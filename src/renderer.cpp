@@ -54,17 +54,15 @@ wga_err Drawer::register_render_object(Render_Object* render_obj){
 void Drawer::draw_objects(){
     clear_screen(m_background_colour);
     vector<vector<Render_Object*> >::iterator layer;
+    draw_pos offset;
     for (layer = render_layers.begin(); layer != render_layers.end(); layer++){
         // Posible optimisation for OpenCL
         vector<Render_Object*>::iterator render_object;
         for (render_object = (*layer).begin(); render_object != (*layer).end(); render_object++){
-            if ((*render_object)->m_is_subclass){
-                (*render_object)->draw(this);
-            } else {
-                vector<render_rect_properties>::iterator rect;
-                for (rect = (*render_object)->m_rect_props.begin(); rect != (*render_object)->m_rect_props.end(); rect++){
-                    draw_rect(rect->x_offset,rect->y_offset,rect->width,rect->height,rect->colour);
-                }
+            offset = (*render_object)->draw_get_pos();
+            vector<render_rect_properties>::iterator rect;
+            for (rect = (*render_object)->m_rect_props.begin(); rect != (*render_object)->m_rect_props.end(); rect++){
+                draw_rect(rect->x_offset,rect->y_offset,rect->width,rect->height,rect->colour);
             }
         }
     }
@@ -127,13 +125,18 @@ void Drawer::cl_draw_finish(){
 #endif
 }
 
-Render_Object::Render_Object(shared_ptr<Drawer> drawer, render_rect_properties* rect_props, int num_rect_props, int render_layer, bool is_subclass)
-: m_render_layer(render_layer), m_is_subclass(is_subclass) {
+Render_Object::Render_Object(shared_ptr<Drawer> drawer, render_rect_properties* rect_props, int num_rect_props, int render_layer)
+: m_render_layer(render_layer) {
     if (rect_props == NULL || num_rect_props == 0) throw std::invalid_argument("Renderer Error: There must be at least one rect property");
     for (int i=0;i<num_rect_props;i++){
         m_rect_props.push_back(rect_props[i]);
     }
     WGAERRCHECK(drawer->register_render_object(this));
+}
+
+Render_Matrix::Render_Matrix(float x_offset, float y_offset, int width, int height, vector<uint32_t> matrix)
+: m_x_offset(x_offset), m_y_offset(y_offset), m_width(width), m_height(height), m_matrix(matrix) {
+    if (width == 0 || height == 0) throw std::invalid_argument("Renderer Error: The width and height of render matrix must be above 0");
 }
 
 #ifdef USING_OPENCL // Using OpenCL to render

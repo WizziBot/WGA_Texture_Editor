@@ -27,8 +27,29 @@ struct render_rect_properties{
     uint32_t colour;
 };
 
+struct draw_pos {
+    float x;
+    float y;
+};
+
 class Drawer;
 
+// RENDER MATRIX
+class Render_Matrix {
+friend class Drawer;
+public:
+
+Render_Matrix(float x_offset, float y_offset, int width, int height, vector<uint32_t> matrix);
+
+private:
+float m_x_offset=0;
+float m_y_offset=0;
+vector<uint32_t> m_matrix;
+int m_width;
+int m_height;
+};
+
+// RENDER OBJECT
 class Render_Object {
 friend class Drawer;
 public:
@@ -39,18 +60,20 @@ public:
     @param render_layer the id of the render layer of the object where the render objects within the layer will be rendered together,
     the render layers must be declared contiguously i.e. layer 0 must exist before layer 1
 */
-Render_Object(shared_ptr<Drawer> drawer, render_rect_properties* rect_props, int num_rect_props, int render_layer, bool is_subclass);
+Render_Object(shared_ptr<Drawer> drawer, render_rect_properties* rect_props, int num_rect_props, int render_layer);
 
-virtual void draw(Drawer* drawer){};
-
-int m_render_layer;
-
-protected:
-bool m_is_subclass;
-vector<render_rect_properties> m_rect_props;
-    
+virtual draw_pos draw_get_pos(){
+    draw_pos zero = {0,0};
+    return zero;
 };
 
+protected:
+int m_render_layer;
+vector<render_rect_properties> m_rect_props;
+
+};
+
+// DRAWER
 class Drawer {
 public:
 

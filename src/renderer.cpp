@@ -151,7 +151,7 @@ Render_Object::Render_Object(shared_ptr<Drawer> drawer, Render_Matrix* render_ma
     WGAERRCHECK(drawer->register_render_object(this));
 }
 
-Render_Matrix::Render_Matrix(float x_offset, float y_offset, int width, int height, uint32_t* matrix, float unit_size_x, float unit_size_y)
+Render_Matrix::Render_Matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y)
 : m_x_offset(x_offset), m_y_offset(y_offset), m_width(width), m_height(height), m_matrix(matrix), m_unit_size_x(unit_size_x), m_unit_size_y(unit_size_y) {
     if (width == 0 || height == 0) throw std::invalid_argument("Renderer Error: The width and height of render matrix must be above 0");
 }

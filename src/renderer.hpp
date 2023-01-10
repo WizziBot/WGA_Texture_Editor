@@ -51,7 +51,7 @@ public:
     @param unit_size_x the width of each square unit in relative size
     @param unit_size_y the height of each square unit in relative size
 */
-Render_Matrix(float x_offset, float y_offset, int width, int height, uint32_t* matrix, float unit_size_x, float unit_size_y);
+Render_Matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y);
 
 float m_unit_size_x;
 float m_unit_size_y;
@@ -60,8 +60,8 @@ private:
 float m_x_offset=0;
 float m_y_offset=0;
 uint32_t* m_matrix;
-int m_width;
-int m_height;
+float m_width;
+float m_height;
 };
 
 // RENDER OBJECT

@@ -9,7 +9,7 @@
 #define W_WIDTH 800
 #define W_HEIGHT 450
 #define TICK_DELAY 10
-#define C_ONMSG "WinGameAlpha: Started"
+#define C_ONMSG "WGA Texture Editor: Started"
 
 namespace WinGameAlpha {
 
@@ -17,6 +17,7 @@ Render_State render_state;
 
 bool running = false;
 bool resizing = false;
+bool updates = false;
 
 LRESULT window_callback(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam){
     LRESULT result = 0;
@@ -30,18 +31,26 @@ LRESULT window_callback(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam){
             resizing = true;
         } break;
         case WM_SIZE: {
+            updates = true;
             resizing = false;
             RECT rect;
             GetClientRect(hWnd,&rect);
             render_state.width = rect.right - rect.left;
             render_state.height = rect.bottom - rect.top;
             // cout << "ASSIGNING MEMORY" << endl;
+            int buffer_size = render_state.width*render_state.height*sizeof(uint32_t); //3 bytes for RGB and 1 byte padding
+            if (render_state.memory) VirtualFree(render_state.memory,0,MEM_RELEASE);
+            render_state.memory = VirtualAlloc(0, buffer_size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+            if (render_state.memory == NULL){
+                std::cerr << "Memory assignment failure: Render state" << std::endl;
+            }
+            // cout << "ASSIGNINED MEMORY" << endl;
             render_state.bitmap_info.bmiHeader.biWidth = render_state.width;
             render_state.bitmap_info.bmiHeader.biHeight = render_state.height;
             
             // Render every window size update
             // cout << "RESIZE EVENT" << endl;
-            if (running) render_update();
+            // if (running) render_update();
         } break;
 
         default: {
@@ -91,29 +100,32 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     }
 
     while (running){
-        // MSG message;
+        MSG message;
 
-        // while (PeekMessage(&message,window,0,0,PM_REMOVE)) {
-        //     switch(message.message) {
-        //         case WM_LBUTTONDOWN:{
+        while (PeekMessage(&message,window,0,0,PM_REMOVE)) {
+            switch(message.message) {
+                case WM_LBUTTONDOWN:{
 
-        //         }break;
-        //         case WM_LBUTTONUP:{
+                }break;
+                case WM_LBUTTONUP:{
 
-        //         }break;
-        //         default: {
-        //             TranslateMessage(&message);
-        //             DispatchMessage(&message);
-        //         }
-        //     }
-        // }
+                }break;
+                default: {
+                    TranslateMessage(&message);
+                    DispatchMessage(&message);
+                }
+            }
+        }
 
         // Render every tick
         render_tick(input,delta_time);
 
         // Overwrite screen buffer
-        if (render_state.memory){
-            StretchDIBits(hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height, render_state.memory, &render_state.bitmap_info, DIB_RGB_COLORS, SRCCOPY);
+        if (updates){
+            if (render_state.memory){
+                StretchDIBits(hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height, render_state.memory, &render_state.bitmap_info, DIB_RGB_COLORS, SRCCOPY);
+            }
+            updates = false;
         }
         Sleep(TICK_DELAY);
 

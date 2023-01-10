@@ -24,14 +24,19 @@ void render_init(){
     // Register objects
     shared_ptr<Render_Object> arena_robj = make_shared<Render_Object>(drawer, &arena_rect,1,ARENA_RENDER_LAYER,false);
     render_objects.push_back(arena_robj);
+    shared_ptr<Render_Object> player_robj = make_shared<Render_Object>(drawer, &player_rect,1,P_B_RENDER_LAYER,false);
+    render_objects.push_back(player_robj);
     drawer->clear_screen(BACKGROUND_COLOUR);
 
     drawer->draw_objects();
 }
 
 void render_update(){
-    // drawer->clear_screen(BACKGROUND_COLOUR);
-    // render_background();
+    
+}
+
+void render_tick(Input& input, float dt){
+    drawer->draw_objects();
 }
 
 }

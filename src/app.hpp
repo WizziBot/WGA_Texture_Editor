@@ -28,7 +28,4 @@ void render_init();
 void render_tick(Input& input, float dt);
 /* Render on resize event */
 void render_update();
-/* Cleanup */
-void app_cleanup();
-
 }

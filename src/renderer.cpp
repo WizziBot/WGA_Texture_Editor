@@ -67,7 +67,6 @@ void Drawer::draw_objects(){
                 }
             }
         }
-
     }
 }
 

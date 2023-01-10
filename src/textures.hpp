@@ -45,11 +45,8 @@ render_rect_properties player_rect_v2[] = {
         .y_offset=-P_HEIGHT/2-P_BORDER_WIDTH, .width=P_WIDTH, .height=P_BORDER_WIDTH //bottom
     },
     {
-        .x_offset=-P_WIDTH/2-P_BORDER_WIDTH, .width=P_BORDER_WIDTH, .height=P_HEIGHT //
-    },
-    {
-
+        .x_offset=-P_WIDTH/2-P_BORDER_WIDTH, .width=P_BORDER_WIDTH, .height=P_HEIGHT //left
     }
-}; //TOP
+};
 
 }

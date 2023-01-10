@@ -76,8 +76,52 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     HWND window = CreateWindowA((LPCSTR)window_class.lpszClassName, (LPCSTR)"WinGameAlpha", WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, W_WIDTH, W_HEIGHT, 0, 0, hInstance,0);
     HDC hdc = GetDC(window);
     // Frist time render
+    running = true;
     render_init();
-    StretchDIBits(hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height, render_state.memory, &render_state.bitmap_info, DIB_RGB_COLORS, SRCCOPY);
+    Input input;
+
+    float delta_time = 0.016666f; //Initial 60 fps assumption, immediately reassigned after first tick
+    LARGE_INTEGER frame_begin_time, frame_end_time;
+    QueryPerformanceCounter(&frame_begin_time);
+    float performance_frequency;
+    {
+        LARGE_INTEGER perf;
+        QueryPerformanceFrequency(&perf);
+        performance_frequency = (float)perf.QuadPart;
+    }
+
+    while (running){
+        // MSG message;
+
+        // while (PeekMessage(&message,window,0,0,PM_REMOVE)) {
+        //     switch(message.message) {
+        //         case WM_LBUTTONDOWN:{
+
+        //         }break;
+        //         case WM_LBUTTONUP:{
+
+        //         }break;
+        //         default: {
+        //             TranslateMessage(&message);
+        //             DispatchMessage(&message);
+        //         }
+        //     }
+        // }
+
+        // Render every tick
+        render_tick(input,delta_time);
+
+        // Overwrite screen buffer
+        if (render_state.memory){
+            StretchDIBits(hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height, render_state.memory, &render_state.bitmap_info, DIB_RGB_COLORS, SRCCOPY);
+        }
+        Sleep(TICK_DELAY);
+
+        // SPF calculation
+        QueryPerformanceCounter(&frame_end_time);
+        delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart)/performance_frequency;
+        frame_begin_time = frame_end_time;
+    }
 
     return 0;
 }

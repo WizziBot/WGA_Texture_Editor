@@ -22,9 +22,9 @@ void render_init(){
         WGACHECKERRNO("Failed to instantiate drawer.",err);
     }
     // Register objects
-    shared_ptr<Render_Object> arena_robj = make_shared<Render_Object>(drawer, &arena_rect,1,ARENA_RENDER_LAYER,false);
-    render_objects.push_back(arena_robj);
-    shared_ptr<Render_Object> player_robj = make_shared<Render_Object>(drawer, &player_rect,1,P_B_RENDER_LAYER,false);
+    // shared_ptr<Render_Object> arena_robj = make_shared<Render_Object>(drawer, &arena_rect,1,ARENA_RENDER_LAYER,false);
+    // render_objects.push_back(arena_robj);
+    shared_ptr<Render_Object> player_robj = make_shared<Render_Object>(drawer, &player_render_matrix,0);
     render_objects.push_back(player_robj);
     
     drawer->set_background_colour(BACKGROUND_COLOUR);

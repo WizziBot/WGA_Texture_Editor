@@ -18,35 +18,14 @@
 
 namespace WinGameAlpha {
 
-render_rect_properties arena_rect = {
-    .width = ARENA_R*2,
-    .height = ARENA_U*2,
-    .colour = ARENA_COLOUR
-};
-render_rect_properties player_rect = {
-    .width = P_WIDTH,
-    .height = P_HEIGHT,
-    .colour = P_COLOUR
-};
-render_rect_properties ball_rect = {
-    .width = B_DIAMETER,
-    .height = B_DIAMETER,
-    .colour = B_COLOUR
+// notice that player collider height will need to be adjusted to this
+uint32_t player_matrix[] {
+    0xff0000, 0x811131,
+    0x00ff00, 0x001181,
+    0x0000ff, 0x518888,
+    0xff0000, 0x511081
 };
 
-render_rect_properties player_rect_v2[] = {
-    {
-        .width=P_WIDTH, .height=P_HEIGHT, .colour = P_COLOUR //fill
-    },
-    {
-        .y_offset=P_HEIGHT/2+P_BORDER_WIDTH, .width=P_WIDTH, .height=P_BORDER_WIDTH //top
-    },
-    {
-        .y_offset=-P_HEIGHT/2-P_BORDER_WIDTH, .width=P_WIDTH, .height=P_BORDER_WIDTH //bottom
-    },
-    {
-        .x_offset=-P_WIDTH/2-P_BORDER_WIDTH, .width=P_BORDER_WIDTH, .height=P_HEIGHT //left
-    }
-};
+Render_Matrix player_render_matrix(0,0,2,4,player_matrix,5);
 
 }

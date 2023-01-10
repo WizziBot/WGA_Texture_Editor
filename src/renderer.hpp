@@ -39,12 +39,22 @@ class Render_Matrix {
 friend class Drawer;
 public:
 
-Render_Matrix(float x_offset, float y_offset, int width, int height, vector<uint32_t> matrix);
+/* Render matrix is a matrix type texture
+    @param x_offset the x_offset from the related object's coordinates
+    @param y_offset the y_offset from the related object's coordinates
+    @param width the number of elements in width of the matrix
+    @param height the number of elements in height of the matrix
+    @param matrix a pointer to an array of colours for each unit element
+    @param unit_size the side length of each square unit in relative size
+*/
+Render_Matrix(float x_offset, float y_offset, int width, int height, uint32_t* matrix, float unit_size);
+
+float m_unit_size;
 
 private:
 float m_x_offset=0;
 float m_y_offset=0;
-vector<uint32_t> m_matrix;
+uint32_t* m_matrix;
 int m_width;
 int m_height;
 };
@@ -55,12 +65,11 @@ friend class Drawer;
 public:
 /* Render object which contains rectangles to be rendered on each draw() call if registered
     @param drawer a pointer to the drawer instance
-    @param rect_props a pointer to an array of rect properties
-    @param num_rect_props the length of the rect_props array
+    @param render_matrix a pointer to the render matrix texture
     @param render_layer the id of the render layer of the object where the render objects within the layer will be rendered together,
     the render layers must be declared contiguously i.e. layer 0 must exist before layer 1
 */
-Render_Object(shared_ptr<Drawer> drawer, render_rect_properties* rect_props, int num_rect_props, int render_layer);
+Render_Object(shared_ptr<Drawer> drawer, Render_Matrix* render_matrix, int render_layer);
 
 virtual draw_pos draw_get_pos(){
     draw_pos zero = {0,0};
@@ -69,7 +78,7 @@ virtual draw_pos draw_get_pos(){
 
 protected:
 int m_render_layer;
-vector<render_rect_properties> m_rect_props;
+Render_Matrix* m_render_matrix;
 
 };
 

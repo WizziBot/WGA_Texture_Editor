@@ -15,6 +15,9 @@
 #define RECT_DATA_BUF_SIZE 5
 #endif
 
+#define ALPHA_BIT (uint32_t)(1<<31) //high bit of 32bit unsigned
+#define AB ALPHA_BIT
+
 namespace WinGameAlpha{
 
 extern Render_State render_state;
@@ -45,11 +48,13 @@ public:
     @param width the number of elements in width of the matrix
     @param height the number of elements in height of the matrix
     @param matrix a pointer to an array of colours for each unit element
-    @param unit_size the side length of each square unit in relative size
+    @param unit_size_x the width of each square unit in relative size
+    @param unit_size_y the height of each square unit in relative size
 */
-Render_Matrix(float x_offset, float y_offset, int width, int height, uint32_t* matrix, float unit_size);
+Render_Matrix(float x_offset, float y_offset, int width, int height, uint32_t* matrix, float unit_size_x, float unit_size_y);
 
-float m_unit_size;
+float m_unit_size_x;
+float m_unit_size_y;
 
 private:
 float m_x_offset=0;

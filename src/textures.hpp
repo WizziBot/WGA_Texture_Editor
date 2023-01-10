@@ -20,12 +20,13 @@ namespace WinGameAlpha {
 
 // notice that player collider height will need to be adjusted to this
 uint32_t player_matrix[] {
-    0xff0000, 0x811131,
-    0x00ff00, 0x001181,
-    0x0000ff, 0x518888,
-    0xff0000, 0x511081
+    0xff0000,
+    0xff0000,
+    0xff0000,
+    0xff0000,
+    0xff0000
 };
 
-Render_Matrix player_render_matrix(0,0,2,4,player_matrix,5);
+Render_Matrix player_render_matrix(0,0,1,5,player_matrix,4,4);
 
 }

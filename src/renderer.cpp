@@ -61,27 +61,26 @@ void Drawer::draw_objects(){
         vector<Render_Object*>::iterator render_object;
         for (render_object = (*layer).begin(); render_object != (*layer).end(); render_object++){
             offset = (*render_object)->draw_get_pos();
-            cout  << "Ox " << offset.x << " Oy " << offset.y << endl;
 #ifdef USING_OPENCL
             // Optimisation for OpenCL
 #else
             matrix = (*render_object)->m_render_matrix;
-            float unit_size = matrix->m_unit_size;
+            float unit_size_x = matrix->m_unit_size_x;
+            float unit_size_y = matrix->m_unit_size_y;
             float matrix_half_height = matrix->m_height/2;
             float matrix_half_width = matrix->m_width/2;
-            cout << "H: " << matrix->m_height << " W: "<< matrix->m_width <<endl;
-            float square_x_init = offset.x - matrix_half_width*unit_size + unit_size/2;
+            float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2;
             float square_x = square_x_init;
-            float square_y = offset.y + matrix_half_height*unit_size - unit_size/2;
+            float square_y = offset.y + matrix_half_height*unit_size_y - unit_size_y/2;
             uint32_t* unit_col = matrix->m_matrix;
             for (int y = 0; y < matrix->m_height; y++){
                 for (int x = 0; x < matrix->m_width; x++){
-                    cout << "x: " << square_x << " y: " << square_y << endl;
-                    draw_rect(square_x,square_y,unit_size,unit_size,*unit_col);
-                    square_x += unit_size;
+                    if ((*unit_col) & ALPHA_BIT) continue;
+                    draw_rect(square_x,square_y,unit_size_x,unit_size_y,*unit_col);
+                    square_x += unit_size_x;
                     unit_col++;
                 }
-                square_y -= unit_size;
+                square_y -= unit_size_y;
                 square_x = square_x_init;
             }
 #endif
@@ -152,8 +151,8 @@ Render_Object::Render_Object(shared_ptr<Drawer> drawer, Render_Matrix* render_ma
     WGAERRCHECK(drawer->register_render_object(this));
 }
 
-Render_Matrix::Render_Matrix(float x_offset, float y_offset, int width, int height, uint32_t* matrix, float unit_size)
-: m_x_offset(x_offset), m_y_offset(y_offset), m_width(width), m_height(height), m_matrix(matrix), m_unit_size(unit_size) {
+Render_Matrix::Render_Matrix(float x_offset, float y_offset, int width, int height, uint32_t* matrix, float unit_size_x, float unit_size_y)
+: m_x_offset(x_offset), m_y_offset(y_offset), m_width(width), m_height(height), m_matrix(matrix), m_unit_size_x(unit_size_x), m_unit_size_y(unit_size_y) {
     if (width == 0 || height == 0) throw std::invalid_argument("Renderer Error: The width and height of render matrix must be above 0");
 }
 

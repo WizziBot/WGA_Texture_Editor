@@ -27,7 +27,7 @@ LRESULT window_callback(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam){
             running = false;
         } break;
         case WM_SIZING: {
-            cout << "RESIZING EVENT" << endl;
+            // cout << "RESIZING EVENT" << endl;
             resizing = true;
         } break;
         case WM_SIZE: {

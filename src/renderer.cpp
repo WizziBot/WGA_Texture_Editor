@@ -52,6 +52,7 @@ wga_err Drawer::register_render_object(Render_Object* render_obj){
 }
 
 void Drawer::draw_objects(){
+    if (resizing || !running) return;
     clear_screen(m_background_colour);
     vector<vector<Render_Object*> >::iterator layer;
     Render_Matrix* matrix;
@@ -70,18 +71,29 @@ void Drawer::draw_objects(){
             float matrix_half_height = matrix->m_height/2;
             float matrix_half_width = matrix->m_width/2;
             float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2;
-            float square_x = square_x_init;
-            float square_y = offset.y + matrix_half_height*unit_size_y - unit_size_y/2;
+            float square_y_init = offset.y + matrix_half_height*unit_size_y - unit_size_y/2;
+            int unit_size_x_px = floor(render_state.height*(unit_size_x/100.f));
+            int unit_size_y_px = floor(render_state.height*(unit_size_y/100.f));
+            int x0_i = floor(render_state.height*(square_x_init/100) - render_state.height*(unit_size_x/200.f) + render_state.width/2.f);
+            int x1_i = floor(render_state.height*(square_x_init/100) + render_state.height*(unit_size_x/200.f) + render_state.width/2.f);
+            int x0 = x0_i;
+            int x1 = x1_i;
+            int y0 = floor(render_state.height*(square_y_init/100) - render_state.height*(unit_size_y/200.f) + render_state.height/2.f);
+            int y1 = floor(render_state.height*(square_y_init/100) + render_state.height*(unit_size_y/200.f) + render_state.height/2.f);
+            
             uint32_t* unit_col = matrix->m_matrix;
             for (int y = 0; y < matrix->m_height; y++){
                 for (int x = 0; x < matrix->m_width; x++){
-                    if ((*unit_col) & ALPHA_BIT) continue;
-                    draw_rect(square_x,square_y,unit_size_x,unit_size_y,*unit_col);
-                    square_x += unit_size_x;
+                    if (!((*unit_col) & ALPHA_BIT))
+                        draw_rect_px(x0,y0,x1,y1,*unit_col);
+                    x0 += unit_size_x_px;
+                    x1 += unit_size_x_px;
                     unit_col++;
                 }
-                square_y -= unit_size_y;
-                square_x = square_x_init;
+                y0 -= unit_size_y_px;
+                y1 -= unit_size_y_px;
+                x0 = x0_i;
+                x1 = x1_i;
             }
 #endif
         }
@@ -107,7 +119,6 @@ void Drawer::set_background_colour(uint32_t colour){
 }
 
 void Drawer::draw_rect_px(int x0, int y0, int x1, int y1, uint32_t colour){
-    if (resizing || !running) return;
     x0 = clamp(0, x0, render_state.width);
     x1 = clamp(0, x1, render_state.width);
     y0 = clamp(0, y0, render_state.height);

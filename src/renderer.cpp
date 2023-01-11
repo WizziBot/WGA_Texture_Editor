@@ -29,7 +29,8 @@ Drawer::~Drawer(){
     clReleaseCommandQueue(queue);
 
     clReleaseMemObject(src_buf);
-    clReleaseMemObject(rect_data_buf);
+    clReleaseMemObject(matrix_data_buf);
+    clReleaseMemObject(matrix_buf);
 
     clReleaseKernel(draw_rect_kernel);
     clReleaseDevice(device);
@@ -53,6 +54,11 @@ wga_err Drawer::register_render_object(Render_Object* render_obj){
 
 void Drawer::draw_objects(){
     if (resizing || !running) return;
+#ifdef USING_OPENCL
+    cl_int err = 0;
+    clEnqueueUnmapMemObject(queue, src_buf, render_state.memory, 0, NULL, NULL);
+    cl_event wait_for_draw;
+#endif
     clear_screen(m_background_colour);
     vector<vector<Render_Object*> >::iterator layer;
     Render_Matrix* matrix;
@@ -62,16 +68,15 @@ void Drawer::draw_objects(){
         vector<Render_Object*>::iterator render_object;
         for (render_object = (*layer).begin(); render_object != (*layer).end(); render_object++){
             offset = (*render_object)->draw_get_pos();
-#ifdef USING_OPENCL
-            // Optimisation for OpenCL
-#else
+
+
             matrix = (*render_object)->m_render_matrix;
             float unit_size_x = matrix->m_unit_size_x;
             float unit_size_y = matrix->m_unit_size_y;
             float matrix_half_height = matrix->m_height/2;
             float matrix_half_width = matrix->m_width/2;
             float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2;
-            float square_y_init = offset.y + matrix_half_height*unit_size_y - unit_size_y/2;
+            float square_y_init = offset.y - matrix_half_height*unit_size_y + unit_size_y/2;
             int unit_size_x_px = floor(render_state.height*(unit_size_x/100.f));
             int unit_size_y_px = floor(render_state.height*(unit_size_y/100.f));
             int x0_i = floor(render_state.height*(square_x_init/100) - render_state.height*(unit_size_x/200.f) + render_state.width/2.f);
@@ -81,6 +86,32 @@ void Drawer::draw_objects(){
             int y0 = floor(render_state.height*(square_y_init/100) - render_state.height*(unit_size_y/200.f) + render_state.height/2.f);
             int y1 = floor(render_state.height*(square_y_init/100) + render_state.height*(unit_size_y/200.f) + render_state.height/2.f);
             
+#ifdef USING_OPENCL
+            // matrix_data = {minid, maxid, x0, x1, y0, y1, width, height, unit_width, unit_height, wrap_step}
+            // matrix_buffer = {.. uints ..}
+            matrix_data = (cl_uint*)clEnqueueMapBuffer(queue, matrix_data_buf, CL_TRUE, CL_MAP_WRITE, 0, MATRIX_DATA_BUF_SIZE * sizeof(cl_uint), 0, NULL, NULL, &err);
+            OCLEXERR("Failed to map matrix_data pointer onto device buffer.",err);
+            matrix_data[0] = x0 + y0*render_state.width;
+            matrix_data[1] = x0 + unit_size_x_px*(int)matrix->m_width + render_state.width*(y0 + unit_size_y_px*(int)matrix->m_height);
+            matrix_data[2] = x0;
+            matrix_data[3] = x1;
+            matrix_data[4] = y0;
+            matrix_data[5] = y1;
+            matrix_data[6] = matrix->m_width;
+            matrix_data[7] = matrix->m_height;
+            matrix_data[8] = unit_size_x_px;
+            matrix_data[9] = unit_size_y_px;
+            matrix_data[10] = render_state.width - unit_size_x_px*matrix->m_width;
+            // cout << "OPENCL x:" << x0 << " y0" << endl;
+            // fflush(stdout);
+            clEnqueueUnmapMemObject(queue, matrix_data_buf, matrix_data, 0, NULL, NULL);
+            // Wait for previous kernel to finish before changing matrix buffer
+            if (render_object != (*layer).begin()) clWaitForEvents(1,&wait_for_draw);
+            OCLEX(clEnqueueWriteBuffer(queue, matrix_buf, CL_FALSE, 0, matrix->m_height*matrix->m_width*sizeof(cl_uint),matrix->m_matrix, 0, NULL, NULL));
+            // Enqueue kernel
+            OCLEX(clEnqueueNDRangeKernel(queue, draw_matrix_kernel, 1, NULL, &global_work_size, &local_work_size, 0, NULL, &wait_for_draw));
+
+#else
             uint32_t* unit_col = matrix->m_matrix;
             for (int y = 0; y < matrix->m_height; y++){
                 for (int x = 0; x < matrix->m_width; x++){
@@ -90,14 +121,19 @@ void Drawer::draw_objects(){
                     x1 += unit_size_x_px;
                     unit_col++;
                 }
-                y0 -= unit_size_y_px;
-                y1 -= unit_size_y_px;
+                y0 += unit_size_y_px;
+                y1 += unit_size_y_px;
                 x0 = x0_i;
                 x1 = x1_i;
             }
 #endif
         }
     }
+#ifdef USING_OPENCL
+    clFinish(queue);
+    render_state.memory = clEnqueueMapBuffer(queue, src_buf, CL_TRUE, CL_MAP_READ, 0, src_size * sizeof(cl_uint), 0, NULL, NULL, &err);
+    OCLEXERR("Failed to map reder state memory onto device source buffer.",err);
+#endif
 }
 
 void Drawer::clear_screen(uint32_t colour){
@@ -125,9 +161,6 @@ void Drawer::draw_rect_px(int x0, int y0, int x1, int y1, uint32_t colour){
     y1 = clamp(0, y1, render_state.height);
     if (x0 == x1 || y0 == y1) return;
 
-#ifdef USING_OPENCL
-    WGAERRCHECK(cl_draw_rect_px(x0,y0,x1,y1,colour));
-#else
     uint32_t* pixel = (uint32_t*)render_state.memory;
     for (int y = y0; y < y1 ; y++){
         pixel = (uint32_t*)render_state.memory + x0 + y*render_state.width;
@@ -135,7 +168,6 @@ void Drawer::draw_rect_px(int x0, int y0, int x1, int y1, uint32_t colour){
             *pixel++ = colour; 
         }
     }
-#endif
 }
 
 void Drawer::draw_rect(float x, float y, float width, float height, uint32_t colour){
@@ -165,23 +197,10 @@ Render_Object::Render_Object(shared_ptr<Drawer> drawer, Render_Matrix* render_ma
 Render_Matrix::Render_Matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y)
 : m_x_offset(x_offset), m_y_offset(y_offset), m_width(width), m_height(height), m_matrix(matrix), m_unit_size_x(unit_size_x), m_unit_size_y(unit_size_y) {
     if (width == 0 || height == 0) throw std::invalid_argument("Renderer Error: The width and height of render matrix must be above 0");
+    if (width*height > MAX_MATRIX_SIZE) throw std::invalid_argument("Renderer Error: Matrix exdeeded max dim size");
 }
 
 #ifdef USING_OPENCL // Using OpenCL to render
-
-#define OCLERR(msg) {cout << "OpenCL Error: " << msg << endl; \
-                    return WGA_FAILURE;}
-
-#ifdef OCL_ERROR_CHECKING
-#define OCLCHECK(arg) if ((err = arg) != CL_SUCCESS) { cout << "OpenCL Internal Error: Code(" << err << ")\n" \
-                      << #arg << endl; \
-                      return WGA_FAILURE;}
-#define OCLCHECKERR(msg,err_no) if (err_no != CL_SUCCESS) { cout << "OpenCL Internal Error: "<< msg <<" Code(" << err_no << ")" << endl; \
-                      return WGA_FAILURE;}
-#else
-#define OCLCHECK(arg) arg
-#define OCLCHECKERR(err)
-#endif
 
 wga_err Drawer::cl_resize(){
     if (resizing || !running) return WGA_SUCCESS;
@@ -203,7 +222,7 @@ wga_err Drawer::cl_draw_rect_px(const int x0, const int y0, const int x1, const 
     // Write parameters using buffer map
     // rect_data = {minid,maxid,rect_width,wrap_step,colour}
     rect_data = (cl_uint*)clEnqueueMapBuffer(queue, rect_data_buf, CL_TRUE, CL_MAP_WRITE, 0, RECT_DATA_BUF_SIZE * sizeof(cl_uint), 0, NULL, NULL, &err);
-    OCLCHECKERR("Failed to map rect_data pointer onto device buffer.",err);
+    OCLCHECKERR("Rect: Failed to map rect_data pointer onto device buffer.",err);
     rect_data[0] = (cl_uint)y0*render_state.width+x0;
     rect_data[1] = (cl_uint)y1*render_state.width+x1;
     rect_data[2] = (cl_uint)x1-x0;
@@ -218,12 +237,10 @@ wga_err Drawer::cl_draw_rect_px(const int x0, const int y0, const int x1, const 
     clFinish(queue);
 
     render_state.memory = clEnqueueMapBuffer(queue, src_buf, CL_TRUE, CL_MAP_READ, 0, src_size * sizeof(cl_uint), 0, NULL, NULL, &err);
-    OCLCHECKERR("Failed to map reder state memory onto device source buffer.",err);
+    OCLCHECKERR("Rect: Failed to map reder state memory onto device source buffer.",err);
 
-    // Sleep(1000);
     return WGA_SUCCESS;
 }
-
 
 wga_err Drawer::init_opencl(){
 
@@ -277,19 +294,31 @@ wga_err Drawer::init_opencl(){
 
     // Create kernels
     draw_rect_kernel = clCreateKernel(program, "draw_rect_kernel", &err);
+    draw_matrix_kernel = clCreateKernel(program, "draw_matrix_kernel", &err);
     OCLCHECKERR("Failed to create kernel.",err);
 
     // Create buffers
     src_buf = clCreateBuffer(context, CL_MEM_HOST_READ_ONLY | CL_MEM_WRITE_ONLY, src_size * sizeof(cl_uint), NULL, &err);
     OCLCHECKERR("Failed to create source buffer.",err);
+    matrix_data_buf = clCreateBuffer(context, CL_MEM_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, MATRIX_DATA_BUF_SIZE*sizeof(cl_uint), NULL, &err);
+    OCLCHECKERR("Failed to create matrix data buffer.",err);
+    matrix_buf = clCreateBuffer(context, CL_MEM_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, MAX_MATRIX_SIZE*sizeof(cl_uint), NULL, &err);
+    OCLCHECKERR("Failed to create matrix data buffer.",err);
     rect_data_buf = clCreateBuffer(context, CL_MEM_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, RECT_DATA_BUF_SIZE*sizeof(cl_uint), NULL, &err);
     OCLCHECKERR("Failed to create rect_data buffer.",err);
 
     // Set kernel args
+    err = clSetKernelArg(draw_matrix_kernel, 0, sizeof(cl_uint*), (cl_uint*) &matrix_data_buf);
+    OCLCHECKERR("Failed to set matrix kernel argument matrix_data_buf.",err);
+    err = clSetKernelArg(draw_matrix_kernel, 1, sizeof(cl_uint*), (cl_uint*) &matrix_buf);
+    OCLCHECKERR("Failed to set matrix kernel argument matrix_buf.",err);
+    err = clSetKernelArg(draw_matrix_kernel, 2, sizeof(void*), (void*) &src_buf);
+    OCLCHECKERR("Failed to set matrix kernel argument src_buf.",err);
+
     err = clSetKernelArg(draw_rect_kernel, 0, sizeof(cl_uint*), (cl_uint*) &rect_data_buf);
-    OCLCHECKERR("Failed to set kernel argument rect_data_buf.",err);
+    OCLCHECKERR("Failed to set rect kernel argument rect_data_buf.",err);
     err = clSetKernelArg(draw_rect_kernel, 1, sizeof(void*), (void*) &src_buf);
-    OCLCHECKERR("Failed to set kernel argument src_buf.",err);
+    OCLCHECKERR("Failed to set rect kernel argument src_buf.",err);
 
     return WGA_SUCCESS;
 }

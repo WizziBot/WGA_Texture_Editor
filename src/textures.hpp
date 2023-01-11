@@ -18,7 +18,20 @@ uint32_t player_matrix[] {
     0xffff00,
     0xff00ff
 };
+uint32_t test_matrix[] {
+    0xffffff,0x664433,
+    0xff5500,0x000000,
+    0xff0055,0x118800,
+    0xffff00,0x110066,
+    0xff00ff,0x0000ff
+};
 
-Render_Matrix player_render_matrix(0,0,1,5,player_matrix,4,4);
+uint32_t test_matrix2[] {
+    0xffffff,0x000000, 0xff0000,
+    0x00ff00,0x0000ff, 0x555555,
+    0x000000,0x888888, 0xffffff
+};
+
+Render_Matrix player_render_matrix(0,0,3,3,test_matrix2,10,10);
 
 }

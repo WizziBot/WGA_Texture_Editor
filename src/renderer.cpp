@@ -87,21 +87,25 @@ void Drawer::draw_objects(){
             int y1 = floor(render_state.height*(square_y_init/100) + render_state.height*(unit_size_y/200.f) + render_state.height/2.f);
             
 #ifdef USING_OPENCL
-            // matrix_data = {minid, maxid, x0, x1, y0, y1, width, height, unit_width, unit_height, wrap_step}
+            x0 = clamp(0, x0, render_state.width);
+            x1 = clamp(0, x1, render_state.width);
+            y0 = clamp(0, y0, render_state.height);
+            y1 = clamp(0, y1, render_state.height);
+            if (x0 == x1 || y0 == y1) continue;
+            // matrix_data = {minid, maxid, buffer_width, width, height, unit_width, unit_height, x0}
             // matrix_buffer = {.. uints ..}
             matrix_data = (cl_uint*)clEnqueueMapBuffer(queue, matrix_data_buf, CL_TRUE, CL_MAP_WRITE, 0, MATRIX_DATA_BUF_SIZE * sizeof(cl_uint), 0, NULL, NULL, &err);
             OCLEXERR("Failed to map matrix_data pointer onto device buffer.",err);
             matrix_data[0] = x0 + y0*render_state.width;
             matrix_data[1] = x0 + unit_size_x_px*(int)matrix->m_width + render_state.width*(y0 + unit_size_y_px*(int)matrix->m_height);
-            matrix_data[2] = x0;
-            matrix_data[3] = x1;
-            matrix_data[4] = y0;
-            matrix_data[5] = y1;
-            matrix_data[6] = matrix->m_width;
-            matrix_data[7] = matrix->m_height;
-            matrix_data[8] = unit_size_x_px;
-            matrix_data[9] = unit_size_y_px;
-            matrix_data[10] = render_state.width - unit_size_x_px*matrix->m_width;
+            matrix_data[2] = render_state.width;
+            matrix_data[3] = matrix->m_width;
+            matrix_data[4] = matrix->m_height;
+            matrix_data[5] = unit_size_x_px;
+            matrix_data[6] = unit_size_y_px;
+            matrix_data[7] = render_state.width - unit_size_x_px*matrix->m_width;
+            matrix_data[8] = x0 % render_state.width;
+            matrix_data[9] = y0;
             // cout << "OPENCL x:" << x0 << " y0" << endl;
             // fflush(stdout);
             clEnqueueUnmapMemObject(queue, matrix_data_buf, matrix_data, 0, NULL, NULL);
@@ -287,7 +291,7 @@ wga_err Drawer::init_opencl(){
     if(err != CL_SUCCESS) {
       char buf[0x10000];
 
-      clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0x10000, buf, NULL);
+      err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0x10000, buf, NULL);
       cout << buf << endl;
       OCLCHECKERR("Failed to build program.",err);
     }

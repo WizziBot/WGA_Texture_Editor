@@ -1,7 +1,7 @@
 #pragma once
 #include "app.hpp"
 
-#define BACKGROUND_COLOUR 0x2A2A2A
+#define BACKGROUND_COLOUR 0x292929
 #define ARENA_COLOUR 0x222222
 #define B_COLOUR 0xffffff
 #define P_COLOUR 0xf80505
@@ -27,9 +27,18 @@ uint32_t test_matrix[] {
 };
 
 uint32_t test_matrix2[] {
-    0xffffff,0x000000, 0xff0000,
+    0xffffff,0x555555, 0xff00ff,
     0x00ff00,0x0000ff, 0x555555,
-    0x000000,0x888888, 0xffffff
+    0x555555,0x888888, 0xffffff
+};
+uint32_t test_matrix3[] {
+    0xffffff,0xf5f5f5, 0xf2f2f2,
+    0xe5e5e5,0xff99ff, 0xf5f5f5,
+    0xe5e5e5,0xffffff, 0xf2f2f2
+};
+
+uint32_t arena_matrix[] {
+    B_COLOUR
 };
 
 Render_Matrix player_render_matrix(0,0,3,3,test_matrix2,10,10);

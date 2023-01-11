@@ -12,7 +12,7 @@
 #define OCL_ERROR_CHECKING
 #define CL_TARGET_OPENCL_VERSION 300
 #include <CL/cl.h>
-#define MATRIX_DATA_BUF_SIZE 11
+#define MATRIX_DATA_BUF_SIZE 10
 #define RECT_DATA_BUF_SIZE 5
 #define OCLERR(msg) {cout << "OpenCL Error: " << msg << endl; \
                     return WGA_FAILURE;}
@@ -184,28 +184,26 @@ const char *kernel_source = \
 {\n\
     uint minid = matrix_data[0];\n\
     uint maxid = matrix_data[1];\n\
-    uint x0 = matrix_data[2];\n\
-    uint x1 = matrix_data[3];\n\
-    uint y0 = matrix_data[4];\n\
-    uint y1 = matrix_data[5];\n\
-    uint width = matrix_data[6];\n\
-    uint height = matrix_data[7];\n\
-    uint unit_width = matrix_data[8];\n\
-    uint unit_height = matrix_data[9];\n\
-    uint wrap_step = matrix_data[10];\n\
+    uint buffer_width = matrix_data[2];\n\
+    uint width = matrix_data[3];\n\
+    uint height = matrix_data[4];\n\
+    uint unit_width = matrix_data[5];\n\
+    uint unit_height = matrix_data[6];\n\
+    uint wrap_step = matrix_data[7];\n\
+    uint x0 = matrix_data[8];\n\
+    uint y0 = matrix_data[9];\n\
     \n\
     uint gid = get_global_id(0);\n\
     uint overflow = (gid/(width*unit_width)) * wrap_step;\n\
     uint idx = minid + gid + overflow;\n\
     uint stride = get_global_size(0);\n\
 \n\
-    int i = 0;\n\
-    int matrix_idx = gid/unit_width;\n\
-    int stride_cutoff = ((gid+stride)%(width*unit_width));\n\
+    int i = 1;\n\
+    int matrix_idx;\n\
+    int stride_cutoff;\n\
     while (idx<maxid){\n\
-        buffer[idx] = 0xffffff;\n\
-        stride_cutoff = ((idx+stride)%(width*unit_width));\n\
-        matrix_idx = ((gid+stride*i)/(width*unit_width))/unit_height + stride_cutoff/unit_width;\n\
+        matrix_idx = (((idx)%buffer_width)-x0)/(unit_width) + ((((idx)/buffer_width) - y0)/(unit_height+1))*width;\n\
+        buffer[idx] = matrix_buffer[matrix_idx];\n\
         idx = minid + gid + stride*i + ((gid+stride*i)/(width*unit_width)) * wrap_step;\n\
         i++;\n\
     }\n\

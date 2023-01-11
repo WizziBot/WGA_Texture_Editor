@@ -20,6 +20,7 @@ void render_init(){
     if (err != WGA_SUCCESS){
         drawer.reset();
         WGACHECKERRNO("Failed to instantiate drawer.",err);
+        return;
     }
     // Register objects
     // shared_ptr<Render_Object> arena_robj = make_shared<Render_Object>(drawer, &arena_rect,1,ARENA_RENDER_LAYER,false);

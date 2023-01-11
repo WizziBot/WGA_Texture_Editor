@@ -1,6 +1,6 @@
 // Not actual kernel code, kernel located in string within renderer.hpp, just used for docs
 
-// matrix_data = {minid, maxid, x0, x1, y0, y1, width, height, unit_width, unit_height}
+// matrix_data = {minid, maxid, buffer_width, width, height, unit_width, unit_height, x0}
 // matrix_buffer = {.. uints ..}
 
 __kernel void draw_matrix_kernel(const __global uint *matrix_data,
@@ -9,15 +9,14 @@ __kernel void draw_matrix_kernel(const __global uint *matrix_data,
 {
     uint minid = matrix_data[0];
     uint maxid = matrix_data[1];
-    uint x0 = matrix_data[2];
-    uint x1 = matrix_data[3];
-    uint y0 = matrix_data[4];
-    uint y1 = matrix_data[5];
-    uint width = matrix_data[6];
-    uint height = matrix_data[7];
-    uint unit_width = matrix_data[8];
-    uint unit_height = matrix_data[9];
-    uint wrap_step = matrix_data[10];
+    uint buffer_width = matrix_data[2];
+    uint width = matrix_data[3];
+    uint height = matrix_data[4];
+    uint unit_width = matrix_data[5];
+    uint unit_height = matrix_data[6];
+    uint wrap_step = matrix_data[7];
+    uint x0 = matrix_data[8];
+    uint y0 = matrix_data[9];
     
     uint gid = get_global_id(0);
     uint overflow = (gid/(width*unit_width)) * wrap_step;
@@ -25,12 +24,11 @@ __kernel void draw_matrix_kernel(const __global uint *matrix_data,
     uint stride = get_global_size(0);
 
     int i = 0;
-    int matrix_idx = gid/unit_width;
+    int matrix_idx;
     int stride_cutoff;
     while (idx<maxid){
+        matrix_idx = (((idx)%buffer_width)-x0)/(unit_width) + ((((idx)/buffer_width) - y0)/(unit_height+1))*width;
         buffer[idx] = matrix_buffer[matrix_idx];
-        stride_cutoff = ((idx+stride)%(width*unit_width));
-        matrix_idx = ((gid+stride*i)/(width*unit_width))/unit_height + stride_cutoff/unit_width;
         idx = minid + gid + stride*i + ((gid+stride*i)/(width*unit_width)) * wrap_step;
         i++;
     }

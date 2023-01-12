@@ -97,7 +97,7 @@ void Drawer::draw_objects(){
             matrix_data = (cl_uint*)clEnqueueMapBuffer(queue, matrix_data_buf, CL_TRUE, CL_MAP_WRITE, 0, MATRIX_DATA_BUF_SIZE * sizeof(cl_uint), 0, NULL, NULL, &err);
             OCLEXERR("Failed to map matrix_data pointer onto device buffer.",err);
             matrix_data[0] = x0 + y0*render_state.width;
-            matrix_data[1] = x0 + unit_size_x_px*(int)matrix->m_width + render_state.width*(y0 + unit_size_y_px*(int)matrix->m_height);
+            matrix_data[1] = x0 + unit_size_x_px*(int)matrix->m_width + render_state.width*(y0 + unit_size_y_px*(int)matrix->m_height - 1);
             matrix_data[2] = render_state.width;
             matrix_data[3] = matrix->m_width;
             matrix_data[4] = matrix->m_height;

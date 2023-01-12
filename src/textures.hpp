@@ -41,6 +41,4 @@ uint32_t arena_matrix[] {
     B_COLOUR
 };
 
-Render_Matrix player_render_matrix(0,0,2,5,test_matrix,10,10);
-
 }

@@ -4,7 +4,6 @@
 #include "utils.hpp"
 #include <stdint.h>
 #include <math.h>
-#include <iostream>
 
 
 #ifdef USING_OPENCL
@@ -113,26 +112,17 @@ Render_Matrix* m_render_matrix;
 
 // DRAWER
 class Drawer {
+friend class Texture_Manager;
 public:
 
-Drawer(wga_err& drawer_err);
+Drawer(wga_err* drawer_err);
 ~Drawer();
 
 /* Draw all registered render objects*/
 void draw_objects();
 
-/* Creates a render object and registers it with the drawer. Gets rendered every call to draw().
-    Note: The id of the render layer of the object is a group where the render objects within the layer will be rendered together,
-    the render layers must be declared contiguously i.e. layer 0 must exist before layer 1
-    @param render_obj a pointer to the render object
-    @return WGA_SUCCESS on success and WGA_FAILURE on except
-*/
-wga_err register_render_object(Render_Object* render_obj);
-
 /* Clear window to one colour */
 void clear_screen(uint32_t colour);
-/* Draw rectangle absolute (pixel) coordinates*/
-void draw_rect_px(int x0, int y0, int x1, int y1, uint32_t colour);
 /* Draw rectangle with normalised (to 100) coordinates with respect to the window height.
     0,0 is the centre of the window.
     @param x the x position @param y the y position
@@ -149,6 +139,10 @@ wga_err cl_resize();
 void set_background_colour(uint32_t colour);
 
 private:
+/* Registers render object with the drawer to be drawn on gameloop. */
+wga_err register_render_object(Render_Object* render_obj);
+/* Draw rectangle absolute (pixel) coordinates*/
+void draw_rect_px(int x0, int y0, int x1, int y1, uint32_t colour);
 uint32_t m_background_colour=0;
 vector<vector<Render_Object*> > render_layers;
 

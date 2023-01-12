@@ -1,9 +1,9 @@
 
 #include "core.hpp"
-#include "utils.hpp"
 #include "renderer.hpp"
 #include "app.hpp"
 #include "common.hpp"
+#include "utils.hpp"
 
 /* DEFINES */
 #define W_WIDTH 800

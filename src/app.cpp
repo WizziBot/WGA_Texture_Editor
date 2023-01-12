@@ -40,7 +40,9 @@ void render_init(){
 }
 
 void render_update(){
-    
+#ifdef USING_OPENCL
+    WGAERRCHECK(drawer->cl_resize());
+#endif
 }
 
 void render_tick(Input& input, float dt){

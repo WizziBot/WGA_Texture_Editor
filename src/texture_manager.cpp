@@ -4,7 +4,7 @@ namespace WinGameAlpha {
 
 wga_err Texture_Manager::create_render_object(Render_Matrix* render_matrix, int render_layer){
     wga_err err;
-    render_objects.push_back(Render_Object(m_drawer,render_matrix,render_layer));
+    render_objects.push_back(Render_Object(m_drawer,render_matrix,render_layer,false));
     err = m_drawer->register_render_object(&render_objects.back());
     return err;
 }

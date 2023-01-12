@@ -200,7 +200,6 @@ const char *kernel_source = \
 \n\
     int i = 1;\n\
     int matrix_idx;\n\
-    int stride_cutoff;\n\
     while (idx<maxid){\n\
         matrix_idx = ((idx%buffer_width)-x0)/(unit_width) + (((idx/buffer_width) - y0)/(unit_height))*width;\n\
         buffer[idx] = matrix_buffer[matrix_idx];\n\

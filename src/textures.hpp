@@ -1,12 +1,10 @@
 #pragma once
 #include "app.hpp"
 
-#define BACKGROUND_COLOUR 0x292929
-#define ARENA_COLOUR 0x222222
+#define BACKGROUND_COLOUR 0x252526
+#define ARENA_COLOUR 0x1e1e1e
 #define B_COLOUR 0xffffff
 #define P_COLOUR 0xf80505
-#define P_BORDER_COLOUR 0x991111
-#define P_BORDER_WIDTH 2
 
 namespace WinGameAlpha {
 

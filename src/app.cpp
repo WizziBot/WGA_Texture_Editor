@@ -1,6 +1,9 @@
 
-#include "textures.hpp"
 #include "app.hpp"
+#include "textures.hpp"
+#include "render_objects.hpp"
+#include "texture_manager.hpp"
+#include "renderer.hpp"
 
 namespace WinGameAlpha {
 
@@ -29,9 +32,7 @@ void render_init(){
     }
 
     // Register objects
-    // shared_ptr<Render_Object> arena_robj = make_shared<Render_Object>(drawer, &arena_rect,1,ARENA_RENDER_LAYER,false);
-    // render_objects.push_back(arena_robj);
-    Render_Matrix* m1 = texture_manager->create_render_matrix(0,0,2,5,test_matrix,10,10);
+    shared_ptr<Render_Matrix> m1 = texture_manager->create_render_matrix(0,0,2,5,test_matrix,10,10);
     texture_manager->create_render_object(m1,0);
 
     drawer->set_background_colour(BACKGROUND_COLOUR);

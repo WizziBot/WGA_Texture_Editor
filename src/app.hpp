@@ -1,10 +1,7 @@
 #pragma once
 
 #include "core.hpp"
-#include "renderer.hpp"
-#include "texture_manager.hpp"
 #include "common.hpp"
-#include "utils.hpp"
 
 // Rendering
 #define ARENA_RENDER_LAYER 0

@@ -11,6 +11,8 @@ namespace WinGameAlpha {
 extern bool running;
 extern bool updates;
 
+uint32_t* canvas_matrix;
+
 shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
 

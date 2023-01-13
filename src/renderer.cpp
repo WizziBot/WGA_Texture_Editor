@@ -68,7 +68,7 @@ void Drawer::draw_objects(){
         vector<shared_ptr<Render_Object> >::iterator render_object;
         for (render_object = (*layer).begin(); render_object != (*layer).end(); render_object++){
             offset = (*render_object)->draw_get_pos();
-
+            
             matrix = (*render_object)->m_render_matrix;
             float unit_size_x = matrix->m_unit_size_x;
             float unit_size_y = matrix->m_unit_size_y;
@@ -188,8 +188,9 @@ void Drawer::cl_draw_finish(){
 }
 
 Render_Object::Render_Object(shared_ptr<Drawer> drawer, shared_ptr<Render_Matrix> render_matrix, int render_layer, bool is_subclass)
-: m_render_layer(render_layer), m_render_matrix(render_matrix){
+: m_render_layer(render_layer){
     if (render_matrix == NULL) throw std::invalid_argument("Renderer Error: The render matrix must not be null");
+    m_render_matrix = render_matrix;
     if (is_subclass) {
         shared_ptr<Render_Object> this_obj(this);
         WGAERRCHECK(drawer->register_render_object(this_obj));

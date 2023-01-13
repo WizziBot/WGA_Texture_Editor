@@ -49,7 +49,6 @@ void render_init(){
         WGACHECKERRNO("Failed to instantiate texture_manager.",err);
         return;
     }
-
     // Register objects
     shared_ptr<Render_Matrix> m1 = texture_manager->create_render_matrix(0,0,2,5,test_matrix,10,10);
     texture_manager->create_render_object(m1,0);
@@ -64,8 +63,8 @@ void render_init(){
     canvas_matrix[60] = 0xff0000;
     canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,CANVAS_UNIT_SIZE,CANVAS_UNIT_SIZE);
     texture_manager->create_render_object(canvas,1);
+    WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
-    drawer->draw_objects();
 }
 
 void render_update(){

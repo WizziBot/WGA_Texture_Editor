@@ -8,7 +8,7 @@
 /* DEFINES */
 #define W_WIDTH 800
 #define W_HEIGHT 450
-#define TICK_DELAY 10
+#define TICK_DELAY 20
 #define C_ONMSG "WGA Texture Editor: Started"
 
 namespace WinGameAlpha {
@@ -38,8 +38,6 @@ LRESULT window_callback(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam){
             GetClientRect(hWnd,&rect);
             render_state.width = rect.right - rect.left;
             render_state.height = rect.bottom - rect.top;
-            // cout << "ASSIGNING MEMORY" << endl;
-
 #ifndef USING_OPENCL
             int buffer_size = render_state.width*render_state.height*sizeof(uint32_t); //3 bytes for RGB and 1 byte padding
             if (render_state.memory) VirtualFree(render_state.memory,0,MEM_RELEASE);
@@ -48,7 +46,6 @@ LRESULT window_callback(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam){
                 std::cerr << "Memory assignment failure: Render state" << std::endl;
             }
 #endif
-            // cout << "ASSIGNINED MEMORY" << endl;
             render_state.bitmap_info.bmiHeader.biWidth = render_state.width;
             render_state.bitmap_info.bmiHeader.biHeight = render_state.height;
         } break;
@@ -117,13 +114,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
             }
         }
 
-        // Render every tick
+        Sleep(TICK_DELAY);
+
         if (resized) {
             render_update();
             resized = false;
         }
         render_tick(input,delta_time);
-
         // Overwrite screen buffer
         if (updates){
             if (render_state.memory){
@@ -131,7 +128,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
             }
             updates = false;
         }
-        Sleep(TICK_DELAY);
 
         // SPF calculation
         QueryPerformanceCounter(&frame_end_time);

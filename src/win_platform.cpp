@@ -101,12 +101,20 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
         while (PeekMessage(&message,window,0,0,PM_REMOVE)) {
             switch(message.message) {
+                case WM_LBUTTONUP:
                 case WM_LBUTTONDOWN:{
-
+                    input.mouse_state.changed = true;
+                    input.mouse_state.down = (MK_LBUTTON & message.wParam);
                 }break;
-                case WM_LBUTTONUP:{
-
+                case WM_MOUSEMOVE:{
+                    input.mouse_state.x_pos = LOWORD(message.lParam);
+                    input.mouse_state.y_pos = HIWORD(message.lParam);
                 }break;
+                case WM_MOUSELEAVE:{
+                    cout << "LEAVE" << endl;
+                    input.mouse_state.changed = true;
+                    input.mouse_state.down = false;
+                };
                 default: {
                     TranslateMessage(&message);
                     DispatchMessage(&message);

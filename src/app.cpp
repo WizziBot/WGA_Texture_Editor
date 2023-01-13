@@ -74,6 +74,15 @@ void render_update(){
 }
 
 void render_tick(Input& input, float dt){
+    if (mouse_clicked()){
+        cout << "MOUSE CLICKED: " << input.mouse_state.x_pos << "," << input.mouse_state.y_pos << endl;
+        input.mouse_state.changed = false;
+    }
+    if (mouse_down()) cout << "MOUSE DOWN" << input.mouse_state.x_pos << "," << input.mouse_state.y_pos << endl;
+    if (mouse_released()){
+        cout << "MOUSE RELEASED: " << input.mouse_state.x_pos << "," << input.mouse_state.y_pos << endl;
+        input.mouse_state.changed = false;
+    }
     if (!updates) return;
     cout << "UPDATED" << endl;
     drawer->draw_objects();

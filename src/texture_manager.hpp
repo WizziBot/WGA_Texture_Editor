@@ -38,7 +38,7 @@ shared_ptr<Render_Matrix> create_render_matrix(float x_offset, float y_offset, f
 private:
 shared_ptr<Drawer> m_drawer;
 vector<Render_Object> render_objects;
-vector<shared_ptr<Render_Matrix>> render_matrices;
+vector<Render_Matrix> render_matrices;
 };
 
 }

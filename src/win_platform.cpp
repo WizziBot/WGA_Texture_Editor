@@ -1,9 +1,9 @@
 
 #include "core.hpp"
-#include "renderer.hpp"
-#include "app.hpp"
 #include "common.hpp"
 #include "utils.hpp"
+#include "renderer.hpp"
+#include "app.hpp"
 
 /* DEFINES */
 #define W_WIDTH 800
@@ -138,6 +138,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart)/performance_frequency;
         frame_begin_time = frame_end_time;
     }
-
+    app_cleanup();
     return 0;
 }

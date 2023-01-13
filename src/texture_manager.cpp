@@ -11,9 +11,8 @@ wga_err Texture_Manager::create_render_object(shared_ptr<Render_Matrix> render_m
     return err;
 }
 shared_ptr<Render_Matrix> Texture_Manager::create_render_matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y){
-    render_matrices.push_back(Render_Matrix(x_offset, y_offset, width, height, matrix, unit_size_x, unit_size_y));
-    shared_ptr<Render_Matrix> new_obj(&render_matrices.back());
-    return new_obj;
+    render_matrices.push_back(make_shared<Render_Matrix>(x_offset, y_offset, width, height, matrix, unit_size_x, unit_size_y));
+    return render_matrices.back();
 }
 
 }

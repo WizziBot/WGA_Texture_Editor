@@ -4,9 +4,6 @@
 
 namespace WinGameAlpha {
 
-class Render_Matrix;
-class Render_Object;
-class Drawer;
 
 class Texture_Manager {
 public:
@@ -38,7 +35,7 @@ shared_ptr<Render_Matrix> create_render_matrix(float x_offset, float y_offset, f
 private:
 shared_ptr<Drawer> m_drawer;
 vector<Render_Object> render_objects;
-vector<Render_Matrix> render_matrices;
+vector<shared_ptr<Render_Matrix>> render_matrices;
 };
 
 }

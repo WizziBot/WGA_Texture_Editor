@@ -25,7 +25,7 @@ inline float fclamp(float min, float val, float max) {
 }
 
 /* Returns true if within bounds, false otherwise */
-inline bool within_bounds(float min, float val, float max){
+inline bool within_bounds(int min, int val, int max){
     if (val < max && val > min) return true;
     else return false;
 }

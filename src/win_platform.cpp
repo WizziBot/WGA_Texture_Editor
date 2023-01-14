@@ -111,7 +111,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
                     input.mouse_state.y_pos = HIWORD(message.lParam);
                 }break;
                 case WM_MOUSELEAVE:{
-                    cout << "LEAVE" << endl;
                     input.mouse_state.changed = true;
                     input.mouse_state.down = false;
                 };

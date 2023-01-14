@@ -61,6 +61,8 @@ void Drawer::draw_objects(){
     cl_event wait_for_draw;
 #endif
     clear_screen(m_background_colour);
+    float rh = (float)render_state.height;
+    float rw = (float)render_state.width;
     vector<vector<shared_ptr<Render_Object> > >::iterator layer;
     shared_ptr<Render_Matrix> matrix;
     draw_pos offset;
@@ -76,14 +78,14 @@ void Drawer::draw_objects(){
             float matrix_half_width = matrix->m_width/2;
             float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2;
             float square_y_init = offset.y - matrix_half_height*unit_size_y + unit_size_y/2;
-            int unit_size_x_px = floor(render_state.height*(unit_size_x/100.f));
-            int unit_size_y_px = floor(render_state.height*(unit_size_y/100.f));
-            int x0_i = floor(render_state.height*(square_x_init/100) - render_state.height*(unit_size_x/200.f) + render_state.width/2.f);
-            int x1_i = floor(render_state.height*(square_x_init/100) + render_state.height*(unit_size_x/200.f) + render_state.width/2.f);
+            int unit_size_x_px = floor(rh*(unit_size_x/100.f));
+            int unit_size_y_px = floor(rh*(unit_size_y/100.f));
+            int x0_i = floor(rh*(square_x_init/100.f) - rh*(unit_size_x/200.f) + rw/2.f);
+            int x1_i = floor(rh*(square_x_init/100.f) + rh*(unit_size_x/200.f) + rw/2.f);
             int x0 = x0_i;
             int x1 = x1_i;
-            int y0 = floor(render_state.height*(square_y_init/100) - render_state.height*(unit_size_y/200.f) + render_state.height/2.f);
-            int y1 = floor(render_state.height*(square_y_init/100) + render_state.height*(unit_size_y/200.f) + render_state.height/2.f);
+            int y0 = floor(rh*(square_y_init/100.f) - rh*(unit_size_y/200.f) + rh/2.f);
+            int y1 = floor(rh*(square_y_init/100.f) + rh*(unit_size_y/200.f) + rh/2.f);
             
 #ifdef USING_OPENCL
             x0 = clamp(0, x0, render_state.width);

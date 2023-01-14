@@ -35,6 +35,24 @@ inline void memset32(void *m, uint32_t val, size_t count)
     while(count--) *buf++ = val;
 }
 
+void process_mouse_down(int mouse_x, int mouse_y){
+    // Convert to abs coords
+    float factor = (float)render_state.height/100.f;
+    int canvas_width = floor(CANVAS_WIDTH*factor);
+    int canvas_horz_border = floor((render_state.width-canvas_width)/2);
+    int canvas_height = floor(CANVAS_HEIGHT*factor);
+    int canvas_vert_border = floor((render_state.height-canvas_height)/2);
+    int canvas_unit_size = floor(CANVAS_UNIT_SIZE*factor);
+    // Find canvas matrix square
+    if (within_bounds(canvas_horz_border,mouse_x,canvas_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,canvas_height+canvas_vert_border)){
+        int matrix_x = (mouse_x-canvas_horz_border)/canvas_unit_size;
+        int matrix_y = (mouse_y-canvas_vert_border)/canvas_unit_size;
+        int matrix_index = matrix_x + CANVAS_MATRIX_WIDTH*matrix_y;
+        canvas_matrix[matrix_index] = 0xff0000; //draw red
+        updates = true;
+    }
+}
+
 void render_init(){
     wga_err err;
 
@@ -58,9 +76,7 @@ void render_init(){
     int canvas_height = floor(CANVAS_MATRIX_HEIGHT);
     canvas_matrix = (uint32_t*)VirtualAlloc(0,canvas_height*canvas_width*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     memset32(canvas_matrix,AB,canvas_height*canvas_width);
-    canvas_matrix[30] = 0xffff00;
-    canvas_matrix[50] = 0xff0000;
-    canvas_matrix[60] = 0xff0000;
+
     canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,CANVAS_UNIT_SIZE,CANVAS_UNIT_SIZE);
     texture_manager->create_render_object(canvas,1);
     WGAERRCHECK(texture_manager->register_all_objects());
@@ -75,14 +91,18 @@ void render_update(){
 
 void render_tick(Input& input, float dt){
     if (mouse_clicked()){
-        cout << "MOUSE CLICKED: " << input.mouse_state.x_pos << "," << input.mouse_state.y_pos << endl;
         input.mouse_state.changed = false;
     }
-    if (mouse_down()) cout << "MOUSE DOWN" << input.mouse_state.x_pos << "," << input.mouse_state.y_pos << endl;
+    if (mouse_down()) {
+        // Normalize coordinates
+        int mouse_x = input.mouse_state.x_pos;
+        int mouse_y = render_state.height - input.mouse_state.y_pos;
+        process_mouse_down(mouse_x,mouse_y);
+    }
     if (mouse_released()){
-        cout << "MOUSE RELEASED: " << input.mouse_state.x_pos << "," << input.mouse_state.y_pos << endl;
         input.mouse_state.changed = false;
     }
+
     if (!updates) return;
     cout << "UPDATED" << endl;
     drawer->draw_objects();

@@ -68,17 +68,17 @@ void render_init(){
         return;
     }
     // Register objects
-    shared_ptr<Render_Matrix> m1 = texture_manager->create_render_matrix(0,0,2,5,test_matrix,10,10);
-    texture_manager->create_render_object(m1,0);
-    shared_ptr<Render_Matrix> m2 = texture_manager->create_render_matrix(0,0,1,10,test_matrix,10,10);
-    texture_manager->create_render_object(m2,1);
+    // shared_ptr<Render_Matrix> m1 = texture_manager->create_render_matrix(0,0,2,5,test_matrix,10,10);
+    // texture_manager->create_render_object(m1,0);
+    // shared_ptr<Render_Matrix> m2 = texture_manager->create_render_matrix(0,0,1,10,test_matrix,10,10);
+    // texture_manager->create_render_object(m2,1);
     int canvas_width = floor(CANVAS_MATRIX_WIDTH);
     int canvas_height = floor(CANVAS_MATRIX_HEIGHT);
     canvas_matrix = (uint32_t*)VirtualAlloc(0,canvas_height*canvas_width*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     memset32(canvas_matrix,AB,canvas_height*canvas_width);
 
     canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,CANVAS_UNIT_SIZE,CANVAS_UNIT_SIZE);
-    texture_manager->create_render_object(canvas,1);
+    texture_manager->create_render_object(canvas,0);
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
 }
@@ -104,7 +104,6 @@ void render_tick(Input& input, float dt){
     }
 
     if (!updates) return;
-    cout << "UPDATED" << endl;
     drawer->draw_objects();
 }
 

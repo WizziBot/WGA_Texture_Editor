@@ -39,4 +39,6 @@ uint32_t arena_matrix[] {
     B_COLOUR
 };
 
+uint32_t test_matrix10[10] = {0};
+
 }

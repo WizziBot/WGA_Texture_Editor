@@ -39,3 +39,5 @@ CMakeCache.txt
 .vscode
 
 !vendor/**
+
+*.wgat

@@ -33,6 +33,18 @@ void create_render_object(shared_ptr<Render_Matrix> render_matrix, int render_la
 shared_ptr<Render_Matrix> create_render_matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y);
 /* Register all objects, must be called AFTER all objects are created, will cause memory errors otherwise. */
 wga_err register_all_objects();
+/* Save a render matrix texture as a .wgat file
+    @param matrix pointer to the raw matrix of the render matrix to be copied from
+    @param matrix_size the size of the matrix
+    @param file_name the name of the file
+*/
+static wga_err save_texture(uint32_t* matrix, int matrix_size, const char* file_name);
+/* Read a render matrix texture from a .wgat file
+    @param matrix_dst pointer to the raw matrix of the render matrix to be copied to
+    @param matrix_size the size of the matrix
+    @param file_name the name of the file
+*/
+static wga_err load_texture(uint32_t* matrix_dst, int matrix_size, const char* file_name);
 
 private:
 shared_ptr<Drawer> m_drawer;

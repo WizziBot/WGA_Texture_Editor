@@ -72,6 +72,12 @@ void render_init(){
     // texture_manager->create_render_object(m1,0);
     // shared_ptr<Render_Matrix> m2 = texture_manager->create_render_matrix(0,0,1,10,test_matrix,10,10);
     // texture_manager->create_render_object(m2,1);
+    // WGAERRCHECK(texture_manager->save_texture(test_matrix,10,"test.wgat"));
+    
+    WGAERRCHECK(texture_manager->load_texture(test_matrix10,10,"test.wgat"));
+    shared_ptr<Render_Matrix> m2 = texture_manager->create_render_matrix(0,0,2,5,test_matrix10,10,10);
+    texture_manager->create_render_object(m2,0);
+
     int canvas_width = floor(CANVAS_MATRIX_WIDTH);
     int canvas_height = floor(CANVAS_MATRIX_HEIGHT);
     canvas_matrix = (uint32_t*)VirtualAlloc(0,canvas_height*canvas_width*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);

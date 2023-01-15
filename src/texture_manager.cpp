@@ -23,4 +23,27 @@ wga_err Texture_Manager::register_all_objects(){
     return WGA_SUCCESS;
 }
 
+wga_err Texture_Manager::save_texture(uint32_t* matrix, int matrix_size, const char* file_name){
+    wga_err err;
+    FILE* fd = fopen(file_name,"w");
+    if (fd == NULL) {return WGA_FAILURE;}
+    int written = fwrite(matrix,sizeof(uint32_t),matrix_size,fd);
+    if (written == matrix_size) err = WGA_SUCCESS;
+    else err = WGA_FAILURE;
+    fclose(fd);
+    return err;
+}
+
+wga_err Texture_Manager::load_texture(uint32_t* matrix_dst, int matrix_size, const char* file_name){
+    wga_err err;
+    FILE* fd = fopen(file_name,"r");
+    if (fd == NULL) {return WGA_FAILURE;}
+    int read = fread(matrix_dst,sizeof(uint32_t),matrix_size,fd);
+    if (read == matrix_size) err = WGA_SUCCESS;
+    else err = WGA_FAILURE;
+    fclose(fd);
+    return err;
+
+}
+
 }

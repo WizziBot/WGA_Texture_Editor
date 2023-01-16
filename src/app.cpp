@@ -30,6 +30,8 @@ int canvas_width;
 int canvas_height;
 float canvas_unit_size;
 float canvas_matrix_width;
+int colours_size;
+uint32_t active_colour = 0;
 shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
@@ -68,7 +70,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
         if (matrix_x > cv_higher_x) cv_higher_x = matrix_x;
         if (matrix_y > cv_higher_y) cv_higher_y = matrix_y;
 
-        canvas_matrix[matrix_index] = 0x67cdfd; //draw red
+        canvas_matrix[matrix_index] = active_colour; //draw red
         updates = true;
     }
 }
@@ -132,6 +134,7 @@ void render_init(){
         return;
     }
     // Setup canvas
+    colours_size = settings->get_colours_size();
     canvas_unit_size = settings->get_unit_size();
     canvas_matrix_width = CANVAS_WIDTH/canvas_unit_size;
     canvas_width = floor(canvas_matrix_width);
@@ -164,19 +167,19 @@ void render_update(){
 }
 
 void render_tick(Input& input, float dt){
-    if (mouse_clicked()){
-        input.mouse_state.changed = false;
-    }
     if (mouse_down()) {
         // Normalize coordinates
         int mouse_x = input.mouse_state.x_pos;
         int mouse_y = render_state.height - input.mouse_state.y_pos;
         process_mouse_down(mouse_x,mouse_y);
     }
-    if (mouse_released()) input.mouse_state.changed = false;
     if (btn_pressed(BUTTON_CTRL_S)) {
         save_canvas();
-        input.buttons[BUTTON_CTRL_S].changed = false;
+    }
+    for (int i=0; i < colours_size; i++){
+        if (btn_down(i)){
+            active_colour = settings->get_active_colour(i);
+        }
     }
 
     if (!updates) return;

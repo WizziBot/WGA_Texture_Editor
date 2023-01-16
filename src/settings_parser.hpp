@@ -3,10 +3,14 @@
 
 namespace WinGameAlpha{
 
-enum token_t {
-    NONE,
+enum token_type_t {
     TAG,
     BODY
+};
+enum token_t {
+    NONE,
+    COLOURS,
+    SIZE
 };
 
 class App_Settings {
@@ -17,11 +21,16 @@ public:
 App_Settings(wga_err* status);
 
 /* Set the active colour from colour array when changed by the user*/
-void set_active_colour(int index){
-    active_colour = colours.at(index);
+uint32_t get_active_colour(int index){
+    return colours.at(index);
+}
+float get_unit_size(){
+    return unit_size;
+}
+int get_colours_size(){
+    return colours.size();
 }
 
-uint32_t active_colour;
 private:
 vector<uint32_t> colours;
 float unit_size;

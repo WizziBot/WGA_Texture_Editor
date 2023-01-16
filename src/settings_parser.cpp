@@ -24,29 +24,65 @@ App_Settings::App_Settings(wga_err* status){
     char lex[64];
     int lexi;
 
-    token_t token = TAG;
+    token_type_t token_type = TAG;
+    token_t token = NONE;
+
+    colours.push_back(0x80000000); // Alpha as 0th element
 
     for (int i = 0; i < size; i++){
         switch (buf[i])
         {
-        case '\r':
-            i++;
-            break;
+        case '\0':
         case '\n':
-            if (token != BODY){
+            if (token_type != BODY){
                 errndie("Unexpected newline character")
             }
-
+            if (token == COLOURS){
+                lex[lexi] = '\0';
+                int colour = std::stoul(lex,nullptr,16);
+                colours.push_back(colour);
+            } else if (token == SIZE) {
+                lex[lexi] = '\0';
+                unit_size = std::stoul(lex,nullptr,16);
+            } else {
+                errndie("Unexpected ',' character")
+            }
+            lexi = 0;
+            token_type = TAG;
+            token = NONE;
             break;
+        case '\r':
         case ' ':
-            i++;
             break;
         case ',':
+            if (token == COLOURS){
+                lex[lexi] = '\0';
+                int colour = std::stoul(lex,nullptr,16);
+                colours.push_back(colour);
+            } else if (token == SIZE) {
+                lex[lexi] = '\0';
+                unit_size = std::stoul(lex,nullptr,16);
+            } else {
+                errndie("Unexpected ',' character")
+            }
+            lexi = 0;
             break;
         case ':':
+            if (token_type == TAG){
+                lex[lexi] = '\0';
+                if(!strncmp(lex,"colours",63)){
+                    token = COLOURS;
+                } else if (!strncmp(lex,"size",63)){
+                    token = SIZE;
+                } else {
+                    errndie("Unexpected ':' character")
+                }
+                token_type = BODY;
+                lexi = 0;
+            }
             break;
         default:
-            if (token == TAG || token == BODY){
+            if (token_type == TAG || token_type == BODY){
                 lex[lexi++] = buf[i];
                 if (lexi == 64) {
                     errndie("Lexical Buffer Overflow")

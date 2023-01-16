@@ -10,6 +10,7 @@
 #define NUM_7 0x37
 #define NUM_8 0x38
 #define NUM_9 0x39
+#define VK_S 0x53
 
 // Modulo 0x30 will give key
 
@@ -35,8 +36,14 @@ struct Button_State{
     bool changed = false;
 };
 
+enum Button_Type{
+    BUTTON_CTRL_S = 10,
+
+    BUTTON_COUNT // Relys on enum 0 based incremented
+};
+
 struct Input {
-    Button_State buttons[10];
+    Button_State buttons[BUTTON_COUNT];
     Mouse_State mouse_state;
 };
 

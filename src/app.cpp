@@ -4,12 +4,16 @@
 #include "render_objects.hpp"
 #include "texture_manager.hpp"
 #include "renderer.hpp"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 #define CANVAS_UNIT_SIZE 5.f
 #define CANVAS_WIDTH 180.f
 #define CANVAS_HEIGHT 90.f
 #define CANVAS_MATRIX_WIDTH CANVAS_WIDTH/CANVAS_UNIT_SIZE
 #define CANVAS_MATRIX_HEIGHT CANVAS_HEIGHT/CANVAS_UNIT_SIZE
+
 
 namespace WinGameAlpha {
 
@@ -27,21 +31,11 @@ shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
 
-const char load_texture_name[] = "texture.wgat";
+string load_texture_name;
 
 // Functions
 
 void app_cleanup(){
-    uint32_t* submatrix = texture_manager->crop_matrix(canvas_matrix,canvas_width,cv_lower_x,cv_lower_y,cv_higher_x,cv_higher_y);
-    if (submatrix != NULL){
-        cout << "Width: " << cv_higher_x-cv_lower_x+1 << " Height: " << cv_higher_y-cv_lower_y+1 << endl;
-        wga_err err = texture_manager->save_texture(submatrix,(cv_higher_x-cv_lower_x+1),(cv_higher_y-cv_lower_y+1),load_texture_name);
-        if (err == WGA_SUCCESS) cout << "Success: Texture saved" << endl;
-        else cerr << "Error writing to file: Texture not saved" << endl;
-        VirtualFree(submatrix,0,MEM_RELEASE);
-    } else {
-        cerr << "Unable to generate submatrix: Texture not saved" << endl;
-    }
     VirtualFree(canvas_matrix,0,MEM_RELEASE);
     VirtualFree(loaded_texture,0,MEM_RELEASE);
 }
@@ -73,6 +67,29 @@ void process_mouse_down(int mouse_x, int mouse_y){
 
         canvas_matrix[matrix_index] = 0x67cdfd; //draw red
         updates = true;
+    }
+}
+
+wga_err get_load_texture_name() {
+    for (auto &p : fs::recursive_directory_iterator()) {
+        if (p.path().extension() == ".wgat"){
+            load_texture_name = p.path().generic_string();
+            return WGA_SUCCESS;
+        }
+    }
+    return WGA_FAILURE;
+}
+
+void save_canvas(){
+    uint32_t* submatrix = texture_manager->crop_matrix(canvas_matrix,canvas_width,cv_lower_x,cv_lower_y,cv_higher_x,cv_higher_y);
+    if (submatrix != NULL){
+        cout << "Width: " << cv_higher_x-cv_lower_x+1 << " Height: " << cv_higher_y-cv_lower_y+1 << endl;
+        wga_err err = texture_manager->save_texture(submatrix,(cv_higher_x-cv_lower_x+1),(cv_higher_y-cv_lower_y+1),load_texture_name);
+        if (err == WGA_SUCCESS) cout << "Success: Texture saved" << endl;
+        else cerr << "Error writing to file: Texture not saved" << endl;
+        VirtualFree(submatrix,0,MEM_RELEASE);
+    } else {
+        cerr << "Unable to generate submatrix: Texture not saved" << endl;
     }
 }
 
@@ -116,10 +133,10 @@ void render_init(){
 
     // Load texture
     int width,height;
+    if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
+
     err = texture_manager->load_texture(&loaded_texture,&width,&height,load_texture_name);
     if (err == WGA_SUCCESS){
-        // shared_ptr<Render_Matrix> m2 = texture_manager->create_render_matrix(0,0,width,height,loaded_texture,5,5);
-        // texture_manager->create_render_object(m2,0);
         load_onto_canvas(loaded_texture,width,height);
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
@@ -146,8 +163,10 @@ void render_tick(Input& input, float dt){
         int mouse_y = render_state.height - input.mouse_state.y_pos;
         process_mouse_down(mouse_x,mouse_y);
     }
-    if (mouse_released()){
-        input.mouse_state.changed = false;
+    if (mouse_released()) input.mouse_state.changed = false;
+    if (btn_pressed(BUTTON_CTRL_S)) {
+        save_canvas();
+        input.buttons[BUTTON_CTRL_S].changed = false;
     }
 
     if (!updates) return;

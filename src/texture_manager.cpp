@@ -23,9 +23,9 @@ wga_err Texture_Manager::register_all_objects(){
     return WGA_SUCCESS;
 }
 
-wga_err Texture_Manager::save_texture(uint32_t* matrix, int width, int height, const char* file_name){
+wga_err Texture_Manager::save_texture(uint32_t* matrix, int width, int height, string file_name){
     wga_err err;
-    FILE* fd = fopen(file_name,"w");
+    FILE* fd = fopen(file_name.c_str(),"w");
     if (fd == NULL) {return WGA_FAILURE;}
     int written = fwrite(&width,sizeof(int),1,fd);
     written += fwrite(&height,sizeof(int),1,fd);
@@ -36,9 +36,9 @@ wga_err Texture_Manager::save_texture(uint32_t* matrix, int width, int height, c
     return err;
 }
 
-wga_err Texture_Manager::load_texture(uint32_t** matrix_dst, int* width, int* height, const char* file_name){
+wga_err Texture_Manager::load_texture(uint32_t** matrix_dst, int* width, int* height, string file_name){
     wga_err err;
-    FILE* fd = fopen(file_name,"r");
+    FILE* fd = fopen(file_name.c_str(),"r");
     if (fd == NULL) {return WGA_FAILURE;}
     int _width,_height;
     int read = fread(&_width,sizeof(int),1,fd);

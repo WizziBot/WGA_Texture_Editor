@@ -39,14 +39,14 @@ wga_err register_all_objects();
     @param height the height of the matrix
     @param file_name the name of the file
 */
-static wga_err save_texture(uint32_t* matrix, int width, int height, const char* file_name);
+static wga_err save_texture(uint32_t* matrix, int width, int height, string file_name);
 /* Read a render matrix texture from a .wgat file
     @param matrix_dst double pointer to the location where the render matrix will be stored
     @param width a pointer to where the width will be stored
     @param height a pointer to where the height will be stored
     @param file_name the name of the file
 */
-static wga_err load_texture(uint32_t** matrix_dst, int* width, int* height, const char* file_name);
+static wga_err load_texture(uint32_t** matrix_dst, int* width, int* height, string file_name);
 /* Crop a submatrix out of a larger matrix
     @param matrix a pointer to the main matrix
     @param matrix_width the width of tha main matrix

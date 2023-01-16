@@ -4,6 +4,7 @@
 #include "render_objects.hpp"
 #include "texture_manager.hpp"
 #include "renderer.hpp"
+#include "settings_parser.hpp"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -11,8 +12,8 @@ namespace fs = std::filesystem;
 #define CANVAS_UNIT_SIZE 5.f
 #define CANVAS_WIDTH 175.f
 #define CANVAS_HEIGHT 90.f
-#define CANVAS_MATRIX_WIDTH CANVAS_WIDTH/CANVAS_UNIT_SIZE
-#define CANVAS_MATRIX_HEIGHT CANVAS_HEIGHT/CANVAS_UNIT_SIZE
+// #define CANVAS_MATRIX_WIDTH CANVAS_WIDTH/CANVAS_UNIT_SIZE
+// #define CANVAS_MATRIX_HEIGHT CANVAS_HEIGHT/CANVAS_UNIT_SIZE
 
 
 namespace WinGameAlpha {
@@ -27,9 +28,12 @@ int cv_lower_x=0, cv_lower_y=0;
 int cv_higher_x=0, cv_higher_y=0;
 int canvas_width;
 int canvas_height;
+float canvas_unit_size;
+float canvas_matrix_width;
 shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
+shared_ptr<App_Settings> settings;
 
 string load_texture_name;
 
@@ -57,7 +61,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
     if (within_bounds(canvas_horz_border,mouse_x,canvas_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,canvas_height+canvas_vert_border)){
         int matrix_x = (mouse_x-canvas_horz_border)/canvas_unit_size;
         int matrix_y = (mouse_y-canvas_vert_border)/canvas_unit_size;
-        int matrix_index = matrix_x + CANVAS_MATRIX_WIDTH*matrix_y;
+        int matrix_index = matrix_x + canvas_matrix_width*matrix_y;
 
         if (matrix_x < cv_lower_x) cv_lower_x = matrix_x;
         if (matrix_y < cv_lower_y) cv_lower_y = matrix_y;
@@ -112,7 +116,11 @@ void load_onto_canvas(uint32_t* matrix, int width, int height){
 void render_init(){
     wga_err err;
 
-    // Init drawer
+    settings = make_shared<App_Settings>(&err);
+    if (err != WGA_SUCCESS){
+        WGACHECKERRNO("Failed to load settings.",err);
+        return;
+    }
     drawer = make_shared<Drawer>(&err);
     if (err != WGA_SUCCESS){
         WGACHECKERRNO("Failed to instantiate drawer.",err);
@@ -124,8 +132,10 @@ void render_init(){
         return;
     }
     // Setup canvas
-    canvas_width = floor(CANVAS_MATRIX_WIDTH);
-    canvas_height = floor(CANVAS_MATRIX_HEIGHT);
+    canvas_unit_size = settings->get_unit_size();
+    canvas_matrix_width = CANVAS_WIDTH/canvas_unit_size;
+    canvas_width = floor(canvas_matrix_width);
+    canvas_height = floor(CANVAS_HEIGHT/canvas_unit_size);
     cv_higher_x = cv_lower_x = canvas_width/2;
     cv_higher_y = cv_lower_y = canvas_height/2;
     canvas_matrix = (uint32_t*)VirtualAlloc(0,canvas_height*canvas_width*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);

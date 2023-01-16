@@ -37,7 +37,6 @@ string load_texture_name;
 
 void app_cleanup(){
     VirtualFree(canvas_matrix,0,MEM_RELEASE);
-    VirtualFree(loaded_texture,0,MEM_RELEASE);
 }
 
 inline void memset32(void *m, uint32_t val, size_t count)
@@ -107,6 +106,7 @@ void load_onto_canvas(uint32_t* matrix, int width, int height){
             src++;
         }
     }
+    VirtualFree(matrix,0,MEM_RELEASE);
 }
 
 void render_init(){

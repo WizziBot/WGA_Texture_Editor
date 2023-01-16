@@ -101,11 +101,14 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
         while (PeekMessage(&message,window,0,0,PM_REMOVE)) {
             switch(message.message) {
-                case WM_KEYUP:
+                case WM_KEYUP: 
                 case WM_KEYDOWN: {
                     uint32_t vk_code = (uint32_t)message.wParam;
                     bool is_down = ((message.lParam & (1<<31)) == 0);
-                    int key = vk_code % 0x30;
+                    int key;
+                    if (vk_code > 0x30 && vk_code <= 0x39) key = vk_code % 0x30;
+                    else if (vk_code == VK_S && (GetKeyState(VK_LCONTROL) >> 15)) key = BUTTON_CTRL_S;
+                    else break;
                     input.buttons[key].changed = (is_down != input.buttons[key].down);
                     input.buttons[key].down = is_down;
                 } break;

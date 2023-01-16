@@ -8,7 +8,7 @@
 /* DEFINES */
 #define W_WIDTH 800
 #define W_HEIGHT 450
-#define TICK_DELAY 20
+#define TICK_DELAY 1
 #define C_ONMSG "WGA Texture Editor: Started"
 
 namespace WinGameAlpha {

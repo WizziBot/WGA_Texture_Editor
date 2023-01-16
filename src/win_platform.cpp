@@ -142,7 +142,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
     while (running){
         MSG message;
-
+        for (int i = 0; i < BUTTON_COUNT; i++){
+            input.buttons[i].changed = false;
+        }
         while (PeekMessage(&message,window,0,0,PM_REMOVE)) {
             switch(message.message) {
                 case WM_KEYUP: 
@@ -150,11 +152,19 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
                     uint32_t vk_code = (uint32_t)message.wParam;
                     bool is_down = ((message.lParam & (1<<31)) == 0);
                     int key;
-                    if (vk_code > 0x30 && vk_code <= 0x39) key = vk_code % 0x30;
-                    else if (vk_code == VK_S && (GetKeyState(VK_LCONTROL) >> 15)) key = BUTTON_CTRL_S;
+                    if (vk_code >= 0x30 && vk_code <= 0x39) {
+                        key = vk_code % 0x30;
+                        for (int i = 0; i < BUTTON_COUNT; i++){
+                            input.buttons[i].down = false;
+                        }
+                        input.buttons[key].down = true;
+                    }
+                    else if (vk_code == VK_S && (GetKeyState(VK_LCONTROL) >> 15)) {
+                        key = BUTTON_CTRL_S;
+                        input.buttons[key].changed = (is_down != input.buttons[key].down);
+                        input.buttons[key].down = is_down;
+                    }
                     else break;
-                    input.buttons[key].changed = (is_down != input.buttons[key].down);
-                    input.buttons[key].down = is_down;
                 } break;
                 case WM_LBUTTONUP:
                 case WM_LBUTTONDOWN:{

@@ -16,11 +16,9 @@
 
 #define btn_down(b) input.buttons[b].down
 #define btn_pressed(b) (input.buttons[b].down && input.buttons[b].changed)
-#define btn_released(b) (!input.buttons[b].down && input.buttons[b].changed)
 
 #define mouse_down() input.mouse_state.down
 #define mouse_clicked() (input.mouse_state.down && input.mouse_state.changed)
-#define mouse_released() (!input.mouse_state.down && input.mouse_state.changed)
 
 namespace WinGameAlpha{
 

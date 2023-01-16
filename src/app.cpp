@@ -37,10 +37,10 @@ void app_cleanup(){
         cout << "Width: " << cv_higher_x-cv_lower_x+1 << " Height: " << cv_higher_y-cv_lower_y+1 << endl;
         wga_err err = texture_manager->save_texture(submatrix,(cv_higher_x-cv_lower_x+1),(cv_higher_y-cv_lower_y+1),load_texture_name);
         if (err == WGA_SUCCESS) cout << "Success: Texture saved" << endl;
-        else cout << "Error writing to file: Texture not saved" << endl;
+        else cerr << "Error writing to file: Texture not saved" << endl;
         VirtualFree(submatrix,0,MEM_RELEASE);
     } else {
-        cout << "Unable to generate submatrix: Texture not saved" << endl;
+        cerr << "Unable to generate submatrix: Texture not saved" << endl;
     }
     VirtualFree(canvas_matrix,0,MEM_RELEASE);
     VirtualFree(loaded_texture,0,MEM_RELEASE);
@@ -71,7 +71,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
         if (matrix_x > cv_higher_x) cv_higher_x = matrix_x;
         if (matrix_y > cv_higher_y) cv_higher_y = matrix_y;
 
-        canvas_matrix[matrix_index] = 0xff0000; //draw red
+        canvas_matrix[matrix_index] = 0x67cdfd; //draw red
         updates = true;
     }
 }

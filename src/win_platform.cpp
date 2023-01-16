@@ -101,6 +101,14 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
         while (PeekMessage(&message,window,0,0,PM_REMOVE)) {
             switch(message.message) {
+                case WM_KEYUP:
+                case WM_KEYDOWN: {
+                    uint32_t vk_code = (uint32_t)message.wParam;
+                    bool is_down = ((message.lParam & (1<<31)) == 0);
+                    int key = vk_code % 0x30;
+                    input.buttons[key].changed = (is_down != input.buttons[key].down);
+                    input.buttons[key].down = is_down;
+                } break;
                 case WM_LBUTTONUP:
                 case WM_LBUTTONDOWN:{
                     input.mouse_state.changed = true;

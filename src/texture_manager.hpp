@@ -35,16 +35,25 @@ shared_ptr<Render_Matrix> create_render_matrix(float x_offset, float y_offset, f
 wga_err register_all_objects();
 /* Save a render matrix texture as a .wgat file
     @param matrix pointer to the raw matrix of the render matrix to be copied from
-    @param matrix_size the size of the matrix
+    @param widht the width of the matrix
+    @param height the height of the matrix
     @param file_name the name of the file
 */
-static wga_err save_texture(uint32_t* matrix, int matrix_size, const char* file_name);
+static wga_err save_texture(uint32_t* matrix, int width, int height, const char* file_name);
 /* Read a render matrix texture from a .wgat file
-    @param matrix_dst pointer to the raw matrix of the render matrix to be copied to
-    @param matrix_size the size of the matrix
+    @param matrix_dst double pointer to the location where the render matrix will be stored
+    @param width a pointer to where the width will be stored
+    @param height a pointer to where the height will be stored
     @param file_name the name of the file
 */
-static wga_err load_texture(uint32_t* matrix_dst, int matrix_size, const char* file_name);
+static wga_err load_texture(uint32_t** matrix_dst, int* width, int* height, const char* file_name);
+/* Crop a submatrix out of a larger matrix
+    @param matrix a pointer to the main matrix
+    @param matrix_width the width of tha main matrix
+    @param x0_y0_x1_y1 Coordinates of corners within the large matrix being the corners of the submatrix
+    @returns a pointer to the submatrix or NULL on failure
+*/
+static uint32_t* crop_matrix(uint32_t* matrix, int matrix_width, int x0, int y0, int x1, int y1);
 
 private:
 shared_ptr<Drawer> m_drawer;

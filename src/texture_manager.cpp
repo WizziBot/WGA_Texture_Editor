@@ -23,27 +23,52 @@ wga_err Texture_Manager::register_all_objects(){
     return WGA_SUCCESS;
 }
 
-wga_err Texture_Manager::save_texture(uint32_t* matrix, int matrix_size, const char* file_name){
+wga_err Texture_Manager::save_texture(uint32_t* matrix, int width, int height, const char* file_name){
     wga_err err;
     FILE* fd = fopen(file_name,"w");
     if (fd == NULL) {return WGA_FAILURE;}
-    int written = fwrite(matrix,sizeof(uint32_t),matrix_size,fd);
-    if (written == matrix_size) err = WGA_SUCCESS;
+    int written = fwrite(&width,sizeof(int),1,fd);
+    written += fwrite(&height,sizeof(int),1,fd);
+    written += fwrite(matrix,sizeof(uint32_t),width*height,fd);
+    if (written == width*height + 2) err = WGA_SUCCESS;
     else err = WGA_FAILURE;
     fclose(fd);
     return err;
 }
 
-wga_err Texture_Manager::load_texture(uint32_t* matrix_dst, int matrix_size, const char* file_name){
+wga_err Texture_Manager::load_texture(uint32_t** matrix_dst, int* width, int* height, const char* file_name){
     wga_err err;
     FILE* fd = fopen(file_name,"r");
     if (fd == NULL) {return WGA_FAILURE;}
-    int read = fread(matrix_dst,sizeof(uint32_t),matrix_size,fd);
-    if (read == matrix_size) err = WGA_SUCCESS;
+    int _width,_height;
+    int read = fread(&_width,sizeof(int),1,fd);
+    read += fread(&_height,sizeof(int),1,fd);
+    uint32_t* matrix = (uint32_t*)VirtualAlloc(0,_width*_height*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    read += fread(matrix,sizeof(uint32_t),_width*_height,fd);
+    if (read == _width*_height + 2) err = WGA_SUCCESS;
     else err = WGA_FAILURE;
     fclose(fd);
+    *width = _width;
+    *height = _height;
+    *matrix_dst = matrix;
     return err;
+}
 
+uint32_t* Texture_Manager::crop_matrix(uint32_t* matrix, int matrix_width, int x0, int y0, int x1, int y1){
+    int width = x1-x0;
+    int height = y1-y0;
+    if (width == 0 || height == 0) return NULL;
+    uint32_t* submatrix = (uint32_t*)VirtualAlloc(0,width*height*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (submatrix==NULL) return NULL;
+    uint32_t* mp = matrix;
+    uint32_t* smp = submatrix;
+    for (int y=y0; y <= y1; y++){
+        for (int x=x0; x <= x1; x++){
+            *smp = matrix[y*matrix_width + x];
+            smp++;
+        }
+    }
+    return submatrix;
 }
 
 }

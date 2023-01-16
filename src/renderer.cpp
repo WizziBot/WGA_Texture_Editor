@@ -76,8 +76,8 @@ void Drawer::draw_objects(){
             float unit_size_y = matrix->m_unit_size_y;
             float matrix_half_height = matrix->m_height/2;
             float matrix_half_width = matrix->m_width/2;
-            float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2;
-            float square_y_init = offset.y - matrix_half_height*unit_size_y + unit_size_y/2;
+            float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2 + matrix->m_x_offset;
+            float square_y_init = offset.y - matrix_half_height*unit_size_y + unit_size_y/2 + matrix->m_y_offset;
             int unit_size_x_px = floor(rh*(unit_size_x/100.f));
             int unit_size_y_px = floor(rh*(unit_size_y/100.f));
             int x0_i = floor(rh*(square_x_init/100.f) - rh*(unit_size_x/200.f) + rw/2.f);

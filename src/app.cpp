@@ -31,6 +31,8 @@ int canvas_height;
 float canvas_unit_size;
 float canvas_matrix_width;
 int colours_size;
+float cv_offsetX;
+float cv_offsetY;
 uint32_t active_colour = 0;
 shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
@@ -55,13 +57,17 @@ inline void memset32(void *m, uint32_t val, size_t count)
 void process_mouse_down(int mouse_x, int mouse_y){
     // Convert to abs coords
     float factor = (float)render_state.height/100.f;
-    int canvas_width = floor(CANVAS_WIDTH*factor);
-    int canvas_horz_border = floor((render_state.width-canvas_width)/2);
-    int canvas_height = floor(CANVAS_HEIGHT*factor);
-    int canvas_vert_border = floor((render_state.height-canvas_height)/2);
+    // int canvas_width = floor(CANVAS_WIDTH*factor);
+    
+    // int canvas_height = floor(CANVAS_HEIGHT*factor);
+    
     int cv_unit_size = floor(canvas_unit_size*factor);
+    int cv_width = cv_unit_size*canvas_width;
+    int cv_height = cv_unit_size*canvas_height;
+    int canvas_horz_border = floor((render_state.width-cv_width)/2 + cv_offsetX);
+    int canvas_vert_border = floor((render_state.height-cv_height)/2 + cv_offsetY);
     // Find canvas matrix square
-    if (within_bounds(canvas_horz_border,mouse_x,canvas_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,canvas_height+canvas_vert_border)){
+    if (within_bounds(canvas_horz_border,mouse_x,cv_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,cv_height+canvas_vert_border)){
         int matrix_x = (mouse_x-canvas_horz_border)/cv_unit_size;
         int matrix_y = (mouse_y-canvas_vert_border)/cv_unit_size;
         int matrix_index = matrix_x + canvas_matrix_width*matrix_y;
@@ -170,10 +176,9 @@ void render_init(){
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
     float factor = (float)render_state.height/100.f;
-    float offsetX = fmod(CANVAS_WIDTH*factor,canvas_unit_size*factor)/2;
-    float offsetY = fmod(CANVAS_HEIGHT*factor,canvas_unit_size*factor)/2;
-    cout << offsetX << ", " << offsetY << endl;
-    canvas = texture_manager->create_render_matrix(offsetX,offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
+    cv_offsetX = fmod(CANVAS_WIDTH*factor,canvas_unit_size*factor)/2;
+    cv_offsetY = fmod(CANVAS_HEIGHT*factor,canvas_unit_size*factor)/2;
+    canvas = texture_manager->create_render_matrix(cv_offsetX,cv_offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
     texture_manager->create_render_object(canvas,0);
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);

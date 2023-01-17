@@ -1,7 +1,7 @@
 # WinGameAlpha Texture Editor
 
 ## Settings
-There must be a file named `settings.wgas` which contains information in the following format
+There must be a file named `settings.wgas` in the immediate directory of execution (note that if using a command line to spawn the application, this may not be the same as the directory the executable is in) which contains information in the following format
 ```
 colour: 0xff0000, 0x00ff00, 0x0000ff
 size: 5

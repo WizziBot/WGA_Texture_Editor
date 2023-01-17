@@ -68,6 +68,8 @@ void process_mouse_down(int mouse_x, int mouse_y){
         int matrix_y = (mouse_y-canvas_vert_border)/cv_unit_size;
         int matrix_index = matrix_x + canvas_matrix_width*matrix_y;
         
+        canvas_matrix[matrix_index] = active_colour;
+        updates = true;
         // Adjust submatrix boundary
         if ((cv_higher_x-cv_lower_x == 0 || cv_higher_y-cv_lower_y == 0) && first_stroke){
             cv_higher_x = cv_lower_x = matrix_x;
@@ -79,10 +81,72 @@ void process_mouse_down(int mouse_x, int mouse_y){
             if (matrix_y < cv_lower_y) cv_lower_y = matrix_y;
             if (matrix_x > cv_higher_x) cv_higher_x = matrix_x;
             if (matrix_y > cv_higher_y) cv_higher_y = matrix_y;
+        } else {
+            bool can_reduce = true;
+            // Calculate whether to decrement submatrix boundary
+            // Check all squares within bound on the edge to see if any of them are non-alpha
+            int mx = matrix_x;
+            int my = matrix_y;
+            // Sides
+            for (int i=cv_lower_y; i <=cv_higher_y; i++){
+                if (mx == cv_lower_x || mx == cv_higher_x){
+                    int cv_index = mx + cv_lower_y*canvas_matrix_width;
+                    for (int y = cv_lower_y; y <= cv_higher_y; y++){
+                        if (canvas_matrix[cv_index] != ALPHA_BIT){
+                            can_reduce = false;
+                            break;
+                        }
+                        cv_index += canvas_matrix_width;
+                    }
+                    if (can_reduce){
+                        if (mx == cv_lower_x) {
+                            cv_lower_x++;
+                            mx++;
+                        }
+                        else {
+                            cv_higher_x--;
+                            mx--;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            can_reduce = true;
+            // Top & Bottom
+            for (int i=cv_lower_x; i <=cv_higher_x; i++){
+                if (my == cv_lower_y || my == cv_higher_y) {
+                    int cv_index = my*canvas_matrix_width + cv_lower_x;
+                    for (int x = cv_lower_x; x <= cv_higher_x; x++){
+                        if (canvas_matrix[cv_index] != ALPHA_BIT){
+                            can_reduce = false;
+                            break;
+                        }
+                        cv_index++;
+                    }
+                    if (can_reduce){
+                        if (my == cv_lower_y) {
+                            cv_lower_y++;
+                            my++;
+                        }
+                        else {
+                            cv_higher_y--;
+                            my--;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            if (cv_lower_x > cv_higher_x){
+                cv_higher_x = cv_lower_x;
+                first_stroke = true;
+            } else if (cv_lower_y > cv_higher_y){
+                cv_higher_y = cv_lower_y;
+                first_stroke = true;
+            }
         }
-
-        canvas_matrix[matrix_index] = active_colour;
-        updates = true;
     }
 }
 
@@ -162,7 +226,6 @@ void render_init(){
     cv_higher_y = cv_lower_y = canvas_height/2;
     canvas_matrix = (uint32_t*)VirtualAlloc(0,canvas_height*canvas_width*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     memset32(canvas_matrix,AB,canvas_height*canvas_width);
-    canvas_matrix[34] = 0;
     // Load texture
     int width,height;
     if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
@@ -175,8 +238,6 @@ void render_init(){
     float factor = (float)render_state.height/100.f;
     cv_offsetX = fmod(CANVAS_WIDTH*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
     cv_offsetY = fmod(CANVAS_HEIGHT*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
-    cout << cv_offsetX << ", " << cv_offsetY <<endl;
-    cout << "H: " << CANVAS_HEIGHT*factor << endl;
     canvas = texture_manager->create_render_matrix(cv_offsetX,cv_offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
     texture_manager->create_render_object(canvas,0);
     WGAERRCHECK(texture_manager->register_all_objects());

@@ -7,6 +7,8 @@ App_Settings::App_Settings(wga_err* status){
 #define errndie(msg) cerr << "Settings Parser Error: " << msg << endl; \
                      *status = WGA_FAILURE; \
                      return;
+#define warn(msg) cerr << "Settings Parser Warning: " << msg << endl; \
+                     return;
     // Main parser
     FILE* fd = fopen("settings.wgas","r");
     if (fd == NULL) {
@@ -44,8 +46,6 @@ App_Settings::App_Settings(wga_err* status){
             } else if (token == SIZE) {
                 lex[lexi] = '\0';
                 unit_size = std::stoul(lex,nullptr,16);
-            } else {
-                errndie("Unexpected ',' character")
             }
             lexi = 0;
             token_type = TAG;
@@ -75,7 +75,7 @@ App_Settings::App_Settings(wga_err* status){
                 } else if (!strncmp(lex,"size",63)){
                     token = SIZE;
                 } else {
-                    errndie("Unexpected ':' character")
+                    warn("Unknown tag '" << lex <<"'")
                 }
                 token_type = BODY;
                 lexi = 0;

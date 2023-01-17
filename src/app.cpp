@@ -235,7 +235,7 @@ void render_init(){
     memset32(canvas_matrix,AB,canvas_height*canvas_width);
 
     if (err == WGA_SUCCESS){
-        load_onto_canvas(loaded_texture,width,height); // not to self: also fix cv_higher/lower stuff when loaded
+        load_onto_canvas(loaded_texture,width,height);
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
     float factor = (float)render_state.height/100.f;

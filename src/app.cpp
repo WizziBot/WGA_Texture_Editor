@@ -173,8 +173,10 @@ void render_init(){
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
     float factor = (float)render_state.height/100.f;
-    cv_offsetX = fmod(CANVAS_WIDTH*factor,canvas_unit_size*factor)/2;
-    cv_offsetY = fmod(CANVAS_HEIGHT*factor,canvas_unit_size*factor)/2;
+    cv_offsetX = fmod(CANVAS_WIDTH*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
+    cv_offsetY = fmod(CANVAS_HEIGHT*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
+    cout << cv_offsetX << ", " << cv_offsetY <<endl;
+    cout << "H: " << CANVAS_HEIGHT*factor << endl;
     canvas = texture_manager->create_render_matrix(cv_offsetX,cv_offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
     texture_manager->create_render_object(canvas,0);
     WGAERRCHECK(texture_manager->register_all_objects());

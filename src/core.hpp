@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <math.h>
 
 using std::shared_ptr;
 using std::make_shared;

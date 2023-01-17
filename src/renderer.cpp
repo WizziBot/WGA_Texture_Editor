@@ -76,16 +76,16 @@ void Drawer::draw_objects(){
             float unit_size_y = matrix->m_unit_size_y;
             float matrix_half_height = matrix->m_height/2;
             float matrix_half_width = matrix->m_width/2;
-            float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2 + matrix->m_x_offset;
-            float square_y_init = offset.y - matrix_half_height*unit_size_y + unit_size_y/2 + matrix->m_y_offset;
+            float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2;
+            float square_y_init = offset.y - matrix_half_height*unit_size_y + unit_size_y/2;
             int unit_size_x_px = floor(rh*(unit_size_x/100.f));
             int unit_size_y_px = floor(rh*(unit_size_y/100.f));
-            int x0_i = floor(rh*(square_x_init/100.f) - rh*(unit_size_x/200.f) + rw/2.f);
-            int x1_i = floor(rh*(square_x_init/100.f) + rh*(unit_size_x/200.f) + rw/2.f);
+            int x0_i = floor(rh*(square_x_init/100.f) - rh*(unit_size_x/200.f) + rw/2.f) + matrix->m_x_offset;
+            int x1_i = floor(rh*(square_x_init/100.f) + rh*(unit_size_x/200.f) + rw/2.f) + matrix->m_x_offset;
             int x0 = x0_i;
             int x1 = x1_i;
-            int y0 = floor(rh*(square_y_init/100.f) - rh*(unit_size_y/200.f) + rh/2.f);
-            int y1 = floor(rh*(square_y_init/100.f) + rh*(unit_size_y/200.f) + rh/2.f);
+            int y0 = floor(rh*(square_y_init/100.f) - rh*(unit_size_y/200.f) + rh/2.f) + matrix->m_y_offset;
+            int y1 = floor(rh*(square_y_init/100.f) + rh*(unit_size_y/200.f) + rh/2.f) + matrix->m_y_offset;
             
 #ifdef USING_OPENCL
             x0 = clamp(0, x0, render_state.width);

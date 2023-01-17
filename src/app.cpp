@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-#define CANVAS_UNIT_SIZE 5.f
+// #define CANVAS_UNIT_SIZE 5.f
 #define CANVAS_WIDTH 175.f
 #define CANVAS_HEIGHT 90.f
 // #define CANVAS_MATRIX_WIDTH CANVAS_WIDTH/CANVAS_UNIT_SIZE
@@ -59,11 +59,11 @@ void process_mouse_down(int mouse_x, int mouse_y){
     int canvas_horz_border = floor((render_state.width-canvas_width)/2);
     int canvas_height = floor(CANVAS_HEIGHT*factor);
     int canvas_vert_border = floor((render_state.height-canvas_height)/2);
-    int canvas_unit_size = floor(CANVAS_UNIT_SIZE*factor);
+    int cv_unit_size = floor(canvas_unit_size*factor);
     // Find canvas matrix square
     if (within_bounds(canvas_horz_border,mouse_x,canvas_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,canvas_height+canvas_vert_border)){
-        int matrix_x = (mouse_x-canvas_horz_border)/canvas_unit_size;
-        int matrix_y = (mouse_y-canvas_vert_border)/canvas_unit_size;
+        int matrix_x = (mouse_x-canvas_horz_border)/cv_unit_size;
+        int matrix_y = (mouse_y-canvas_vert_border)/cv_unit_size;
         int matrix_index = matrix_x + canvas_matrix_width*matrix_y;
 
         if ((cv_higher_x-cv_lower_x == 0 || cv_higher_y-cv_lower_y == 0) && first_stroke){
@@ -169,8 +169,11 @@ void render_init(){
         load_onto_canvas(loaded_texture,width,height); // not to self: also fix cv_higher/lower stuff when loaded
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
-
-    canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,CANVAS_UNIT_SIZE,CANVAS_UNIT_SIZE);
+    float factor = (float)render_state.height/100.f;
+    float offsetX = fmod(CANVAS_WIDTH*factor,canvas_unit_size*factor)/2;
+    float offsetY = fmod(CANVAS_HEIGHT*factor,canvas_unit_size*factor)/2;
+    cout << offsetX << ", " << offsetY << endl;
+    canvas = texture_manager->create_render_matrix(offsetX,offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
     texture_manager->create_render_object(canvas,0);
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);

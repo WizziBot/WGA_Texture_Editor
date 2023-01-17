@@ -57,26 +57,23 @@ inline void memset32(void *m, uint32_t val, size_t count)
 void process_mouse_down(int mouse_x, int mouse_y){
     // Convert to abs coords
     float factor = (float)render_state.height/100.f;
-    // int canvas_width = floor(CANVAS_WIDTH*factor);
-    
-    // int canvas_height = floor(CANVAS_HEIGHT*factor);
-    
     int cv_unit_size = floor(canvas_unit_size*factor);
     int cv_width = cv_unit_size*canvas_width;
     int cv_height = cv_unit_size*canvas_height;
     int canvas_horz_border = floor((render_state.width-cv_width)/2 + cv_offsetX);
     int canvas_vert_border = floor((render_state.height-cv_height)/2 + cv_offsetY);
-    // Find canvas matrix square
     if (within_bounds(canvas_horz_border,mouse_x,cv_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,cv_height+canvas_vert_border)){
+        // Find canvas matrix square
         int matrix_x = (mouse_x-canvas_horz_border)/cv_unit_size;
         int matrix_y = (mouse_y-canvas_vert_border)/cv_unit_size;
         int matrix_index = matrix_x + canvas_matrix_width*matrix_y;
-
+        
+        // Adjust submatrix boundary
         if ((cv_higher_x-cv_lower_x == 0 || cv_higher_y-cv_lower_y == 0) && first_stroke){
             cv_higher_x = cv_lower_x = matrix_x;
             cv_higher_y = cv_lower_y = matrix_y;
             first_stroke = false;
-        }  
+        } 
         if (active_colour != ALPHA_BIT){
             if (matrix_x < cv_lower_x) cv_lower_x = matrix_x;
             if (matrix_y < cv_lower_y) cv_lower_y = matrix_y;

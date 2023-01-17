@@ -35,8 +35,8 @@ uint32_t test_matrix3[] {
     0xe5e5e5,0xffffff, 0xf2f2f2
 };
 
-uint32_t arena_matrix[] {
-    B_COLOUR
+uint32_t background_matrix[] {
+    ARENA_COLOUR
 };
 
 uint32_t test_matrix10[7*6] = {0};

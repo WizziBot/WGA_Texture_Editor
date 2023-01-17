@@ -37,6 +37,7 @@ wga_err register_all_objects();
     @param matrix pointer to the raw matrix of the render matrix to be copied from
     @param widht the width of the matrix
     @param height the height of the matrix
+    @param unit_size the unit size of the matrix
     @param file_name the name of the file
 */
 static wga_err save_texture(uint32_t* matrix, int width, int height, float unit_size, string file_name);
@@ -44,6 +45,7 @@ static wga_err save_texture(uint32_t* matrix, int width, int height, float unit_
     @param matrix_dst double pointer to the location where the render matrix will be stored
     @param width a pointer to where the width will be stored
     @param height a pointer to where the height will be stored
+    @param unit_size a pointer to where the unit size will be stored
     @param file_name the name of the file
 */
 static wga_err load_texture(uint32_t** matrix_dst, int* width, int* height, float* unit_size, string file_name);

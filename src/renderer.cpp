@@ -63,6 +63,7 @@ void Drawer::draw_objects(){
     clear_screen(m_background_colour);
     float rh = (float)render_state.height;
     float rw = (float)render_state.width;
+    float factor = (float)render_state.height/100.f;
     vector<vector<shared_ptr<Render_Object> > >::iterator layer;
     shared_ptr<Render_Matrix> matrix;
     draw_pos offset;
@@ -74,18 +75,18 @@ void Drawer::draw_objects(){
             matrix = (*render_object)->m_render_matrix;
             float unit_size_x = matrix->m_unit_size_x;
             float unit_size_y = matrix->m_unit_size_y;
-            float matrix_half_height = matrix->m_height/2;
-            float matrix_half_width = matrix->m_width/2;
+            float matrix_half_height = matrix->m_height/2.f;
+            float matrix_half_width = matrix->m_width/2.f;
             float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2 + matrix->m_x_offset;
             float square_y_init = offset.y - matrix_half_height*unit_size_y + unit_size_y/2 + matrix->m_y_offset;
-            int unit_size_x_px = floor(rh*(unit_size_x/100.f));
-            int unit_size_y_px = floor(rh*(unit_size_y/100.f));
-            int x0_i = floor(rh*(square_x_init/100.f) - rh*(unit_size_x/200.f) + rw/2.f);
-            int x1_i = floor(rh*(square_x_init/100.f) + rh*(unit_size_x/200.f) + rw/2.f);
+            int unit_size_x_px = floor(unit_size_x*factor);
+            int unit_size_y_px = floor(unit_size_y*factor);
+            int x0_i = floor(square_x_init*factor - unit_size_x*factor/2.f + rw/2.f);
+            int x1_i = floor(square_x_init*factor + unit_size_x*factor/2.f + rw/2.f);
             int x0 = x0_i;
             int x1 = x1_i;
-            int y0 = floor(rh*(square_y_init/100.f) - rh*(unit_size_y/200.f) + rh/2.f);
-            int y1 = floor(rh*(square_y_init/100.f) + rh*(unit_size_y/200.f) + rh/2.f);
+            int y0 = floor(square_y_init*factor - unit_size_y*factor/2.f + rh/2.f);
+            int y1 = floor(square_y_init*factor + unit_size_y*factor/2.f + rh/2.f);
             
 #ifdef USING_OPENCL
             x0 = clamp(0, x0, render_state.width);
@@ -115,11 +116,14 @@ void Drawer::draw_objects(){
             OCLEX(clEnqueueNDRangeKernel(queue, draw_matrix_kernel, 1, NULL, &global_work_size, &local_work_size, 0, NULL, &wait_for_draw));
 
 #else
+            int mw = (int)matrix->m_width, mh = (int)matrix->m_height;
             uint32_t* unit_col = matrix->m_matrix;
             for (int y = 0; y < matrix->m_height; y++){
                 for (int x = 0; x < matrix->m_width; x++){
                     if (!((*unit_col) & ALPHA_BIT))
                         draw_rect_px(x0,y0,x1,y1,*unit_col);
+                    ((uint32_t*)render_state.memory)[x0 + y0*render_state.width] = 0;
+                    ((uint32_t*)render_state.memory)[x1 + y1*render_state.width] = 0;
                     x0 += unit_size_x_px;
                     x1 += unit_size_x_px;
                     unit_col++;

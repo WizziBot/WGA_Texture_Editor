@@ -62,10 +62,14 @@ void process_mouse_down(int mouse_x, int mouse_y){
     int cv_height = cv_unit_size*canvas_height;
     int canvas_horz_border = floor((render_state.width-cv_width)/2 + cv_offsetX);
     int canvas_vert_border = floor((render_state.height-cv_height)/2 + cv_offsetY);
+    cout << "\nUS: " << cv_unit_size << " B: " << canvas_horz_border << " VB: " << canvas_vert_border << endl;
+    cout << "W: " << cv_width << " H: " << cv_height << endl;
     if (within_bounds(canvas_horz_border,mouse_x,cv_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,cv_height+canvas_vert_border)){
         // Find canvas matrix square
         int matrix_x = (mouse_x-canvas_horz_border)/cv_unit_size;
         int matrix_y = (mouse_y-canvas_vert_border)/cv_unit_size;
+        cout << "MX: " << matrix_x << " MY: " << matrix_y << endl;
+        cout << "MSX: " << mouse_x << " MSY: " << mouse_y << endl;
         int matrix_index = matrix_x + canvas_matrix_width*matrix_y;
         
         canvas_matrix[matrix_index] = active_colour;
@@ -226,6 +230,7 @@ void render_init(){
     // Setup canvas
     colours_size = settings->get_colours_size();
     if ((canvas_unit_size = settings->get_unit_size()) == 0) canvas_unit_size = ld_unit_size;
+    cout << "S: " << canvas_unit_size << endl;
     canvas_matrix_width = CANVAS_WIDTH/canvas_unit_size;
     canvas_width = floor(canvas_matrix_width);
     canvas_height = floor(CANVAS_HEIGHT/canvas_unit_size);
@@ -241,6 +246,8 @@ void render_init(){
     float factor = (float)render_state.height/100.f;
     cv_offsetX = fmod(CANVAS_WIDTH*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
     cv_offsetY = fmod(CANVAS_HEIGHT*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
+    cout << "OX: " << cv_offsetX << " OY: " << cv_offsetY << endl;
+    cout << "CW: " << canvas_width << " CH: " << canvas_height << endl;
     canvas = texture_manager->create_render_matrix(cv_offsetX,cv_offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
     texture_manager->create_render_object(canvas,0);
     shared_ptr<Render_Matrix> c_indicator = texture_manager->create_render_matrix(-CANVAS_WIDTH/2 - 3,CANVAS_HEIGHT/2 - 2,1,1,colour_indicator,4,4);

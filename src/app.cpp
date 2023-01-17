@@ -164,7 +164,7 @@ void save_canvas(){
     uint32_t* submatrix = texture_manager->crop_matrix(canvas_matrix,canvas_width,cv_lower_x,cv_lower_y,cv_higher_x,cv_higher_y);
     if (submatrix != NULL){
         cout << "Width: " << cv_higher_x-cv_lower_x+1 << " Height: " << cv_higher_y-cv_lower_y+1 << endl;
-        wga_err err = texture_manager->save_texture(submatrix,(cv_higher_x-cv_lower_x+1),(cv_higher_y-cv_lower_y+1),load_texture_name);
+        wga_err err = texture_manager->save_texture(submatrix,(cv_higher_x-cv_lower_x+1),(cv_higher_y-cv_lower_y+1),canvas_unit_size,load_texture_name);
         if (err == WGA_SUCCESS) cout << "Success: Texture saved" << endl;
         else cerr << "Error writing to file: Texture not saved" << endl;
         VirtualFree(submatrix,0,MEM_RELEASE);
@@ -216,9 +216,16 @@ void render_init(){
     shared_ptr<Render_Matrix> canvas_background = texture_manager->create_render_matrix(0,0,1,1,background_matrix,CANVAS_WIDTH,CANVAS_HEIGHT);
     texture_manager->create_render_object(canvas_background,0);
 
+    // Load texture
+    int width,height;
+    float ld_unit_size;
+    if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
+
+    err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
+
     // Setup canvas
     colours_size = settings->get_colours_size();
-    canvas_unit_size = settings->get_unit_size();
+    if ((canvas_unit_size = settings->get_unit_size()) == 0) canvas_unit_size = ld_unit_size;
     canvas_matrix_width = CANVAS_WIDTH/canvas_unit_size;
     canvas_width = floor(canvas_matrix_width);
     canvas_height = floor(CANVAS_HEIGHT/canvas_unit_size);
@@ -226,11 +233,7 @@ void render_init(){
     cv_higher_y = cv_lower_y = canvas_height/2;
     canvas_matrix = (uint32_t*)VirtualAlloc(0,canvas_height*canvas_width*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     memset32(canvas_matrix,AB,canvas_height*canvas_width);
-    // Load texture
-    int width,height;
-    if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
 
-    err = texture_manager->load_texture(&loaded_texture,&width,&height,load_texture_name);
     if (err == WGA_SUCCESS){
         load_onto_canvas(loaded_texture,width,height); // not to self: also fix cv_higher/lower stuff when loaded
         cout << "Loaded Texture: " << load_texture_name << endl;

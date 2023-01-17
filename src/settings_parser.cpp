@@ -30,7 +30,7 @@ App_Settings::App_Settings(wga_err* status){
     token_t token = NONE;
 
     colours.push_back(0x80000000); // Alpha as 0th element
-
+    
     for (int i = 0; i < size; i++){
         switch (buf[i])
         {
@@ -91,6 +91,7 @@ App_Settings::App_Settings(wga_err* status){
             break;
         }
     }
+    *status = WGA_SUCCESS;
 }
 
 }

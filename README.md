@@ -16,4 +16,10 @@ By default the active colour is black, to change to your active colours, use the
 
 To save the work as a .wgat file, press `Ctrl+S` and a submatrix will be cropped from the canvas and saved as `texture.wgat`, you are free to rename this file.
 
-When the editor is opened it will search its directory and subdirectories for .wgat files and it will load the first one it finds into the editor and save it to the same file on `Ctrl+S`
+When the editor is opened it will search its directory and subdirectories for .wgat files and it will load the first one it finds into the editor and save it to the same file on `Ctrl+S`. Note that this implies only one file can be in the directory at a time, it is recommended to store made textures in a subfolder and bring them out to the parent folder where the executable is located to edit.
+
+The width and height of the saved texture will display to the console when saving along with any errors, warnings or notices. Ideally start the application from a terminal. (Terminal will not be spawned if exe is double clicked)
+
+Important Note: When erasing rapidly its possible the submatrix boundaries are not correctly adjusted and the matrix will save with alot of extra transparent space, this is simply fixed by clicking again in the area of the white space and shouldn't be a significant bug but keep an eye on the save size (in the terminal)
+
+

@@ -29,7 +29,7 @@ wga_err Texture_Manager::save_texture(uint32_t* matrix, int width, int height, f
     if (fd == NULL) {return WGA_FAILURE;}
     int written = fwrite(&width,sizeof(int),1,fd);
     written += fwrite(&height,sizeof(int),1,fd);
-    written += fwrite(&unit_size,sizeof(int),1,fd);
+    written += fwrite(&unit_size,sizeof(float),1,fd);
     written += fwrite(matrix,sizeof(uint32_t),width*height,fd);
     if (written == width*height + 3) err = WGA_SUCCESS;
     else err = WGA_FAILURE;

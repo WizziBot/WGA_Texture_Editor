@@ -243,6 +243,8 @@ void render_init(){
     cv_offsetY = fmod(CANVAS_HEIGHT*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
     canvas = texture_manager->create_render_matrix(cv_offsetX,cv_offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
     texture_manager->create_render_object(canvas,0);
+    shared_ptr<Render_Matrix> c_indicator = texture_manager->create_render_matrix(-CANVAS_WIDTH/2 - 3,CANVAS_HEIGHT/2 - 2,1,1,colour_indicator,4,4);
+    texture_manager->create_render_object(c_indicator,1);
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
 }
@@ -266,6 +268,8 @@ void render_tick(Input& input, float dt){
     for (int i=0; i < colours_size; i++){
         if (btn_down(i)){
             active_colour = settings->get_active_colour(i);
+            colour_indicator[0] = active_colour;
+            updates = true;
         }
     }
 

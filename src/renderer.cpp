@@ -73,20 +73,16 @@ void Drawer::draw_objects(){
             offset = (*render_object)->draw_get_pos();
             
             matrix = (*render_object)->m_render_matrix;
-            float unit_size_x = matrix->m_unit_size_x;
-            float unit_size_y = matrix->m_unit_size_y;
-            float matrix_half_height = matrix->m_height/2.f;
-            float matrix_half_width = matrix->m_width/2.f;
-            float square_x_init = offset.x - matrix_half_width*unit_size_x + unit_size_x/2 + matrix->m_x_offset;
-            float square_y_init = offset.y - matrix_half_height*unit_size_y + unit_size_y/2 + matrix->m_y_offset;
-            int unit_size_x_px = floor(unit_size_x*factor);
-            int unit_size_y_px = floor(unit_size_y*factor);
-            int x0_i = floor(square_x_init*factor - unit_size_x*factor/2.f + rw/2.f);
-            int x1_i = floor(square_x_init*factor + unit_size_x*factor/2.f + rw/2.f);
+            int unit_size_x_px = floor(matrix->m_unit_size_x*factor);
+            int unit_size_y_px = floor(matrix->m_unit_size_y*factor);
+            int matrix_width = (int)matrix->m_width*unit_size_x_px;
+            int matrix_height = (int)matrix->m_height*unit_size_y_px;
+            int x0_i = render_state.width/2 + floor((offset.x + matrix->m_x_offset)*factor) - matrix_width/2;
+            int x1_i = render_state.width/2 + floor((offset.x + matrix->m_x_offset)*factor) - matrix_width/2 + unit_size_x_px;
             int x0 = x0_i;
             int x1 = x1_i;
-            int y0 = floor(square_y_init*factor - unit_size_y*factor/2.f + rh/2.f);
-            int y1 = floor(square_y_init*factor + unit_size_y*factor/2.f + rh/2.f);
+            int y0 = render_state.height/2 + floor((offset.y + matrix->m_y_offset)*factor) - matrix_height/2;
+            int y1 = render_state.height/2 + floor((offset.y + matrix->m_y_offset)*factor) - matrix_height/2 + unit_size_y_px;
             
 #ifdef USING_OPENCL
             x0 = clamp(0, x0, render_state.width);

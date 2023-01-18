@@ -14,14 +14,23 @@ You can draw within the darker gray area (with the exception of some small borde
 
 By default the active colour is black, to switch to your imported colours use the keyboard keys 1-9 and 0 for erasing. The indicator in the top left will display the current colour you have selected.
 
-To toggle the dot grid press `G` on your keyboard. This is for drawing assistance and will not be saved with the texture.
-
 To save the work as a .wgat file, press `Ctrl+S` and a submatrix will be cropped from the canvas and saved as `texture.wgat`, you are free to rename this file.
 
-When the editor is opened it will search its directory and subdirectories for .wgat files and it will load the first one it finds into the editor and save it to the same file on `Ctrl+S`. Note that this implies only one file can be in the directory at a time, it is recommended to store made textures in a subfolder and bring them out to the parent folder where the executable is located to edit.
+When the editor is opened it will search its directory and subdirectories for .wgat files and it will load the first one it finds into the editor and save it to the same file on `Ctrl+S`. Note that this implies only one file can be in the directory at a time, it is recommended to store made textures in a folder above the current directory in the hirearchy and bring them into where the executable is located to edit as needed.
 
 The width and height of the saved texture will display to the console when saving along with any errors, warnings or notices. Ideally start the application from a terminal. (Terminal will not be spawned if exe is double clicked)
 
 Important Note: When erasing rapidly its possible the submatrix boundaries are not correctly adjusted and the matrix will save with alot of extra transparent space, this is simply fixed by clicking again in the area of the white space and shouldn't be a significant bug but keep an eye on the save size (in the terminal)
 
+## Compatibility with WGA
 
+When saving your texture, the size used is also saved onto the .wgat file and when loaded on WGA, that size will be used. So it is possible to work on a small object up close and then simply load the texture back up and save it on a smaller size to import it to WGA
+
+### WGA Objects Reference
+List of replaceable objects/textures within WGA and their dimensions in normalised coordinates (the same dimensions of the size of your brush). These are not strict requirements but guidelines to know how large to make certain textures.
+
+* `Player` Width: 5, Height: 20, Name: `player.wgat`
+* `Ball` Width: 2, Height: 2, Name: `ball.wgat`
+* `Arena` Width: 180, Height: 90, Name: `arena.wgat`
+
+The `Name` field is what the file must be saved as within the `textures` folder that should be in the same directory as the WinGameAlpha executable.

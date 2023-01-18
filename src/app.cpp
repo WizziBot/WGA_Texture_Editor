@@ -158,7 +158,8 @@ wga_err get_load_texture_name() {
 void save_canvas(){
     uint32_t* submatrix = texture_manager->crop_matrix(canvas_matrix,canvas_width,cv_lower_x,cv_lower_y,cv_higher_x,cv_higher_y);
     if (submatrix != NULL){
-        cout << "Width: " << cv_higher_x-cv_lower_x+1 << " Height: " << cv_higher_y-cv_lower_y+1 << endl;
+        cout << "[Matrix] Width: " << cv_higher_x-cv_lower_x+1 << " Height: " << cv_higher_y-cv_lower_y+1 << " Size: " << canvas_unit_size << endl;
+        cout << "[Total] Width: " << (cv_higher_x-cv_lower_x+1)*canvas_unit_size << " Height: " << (cv_higher_y-cv_lower_y+1)*canvas_unit_size << endl;
         wga_err err = texture_manager->save_texture(submatrix,(cv_higher_x-cv_lower_x+1),(cv_higher_y-cv_lower_y+1),canvas_unit_size,load_texture_name);
         if (err == WGA_SUCCESS) cout << "Success: Texture saved" << endl;
         else cerr << "Error writing to file: Texture not saved" << endl;

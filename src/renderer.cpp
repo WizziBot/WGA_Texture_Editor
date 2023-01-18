@@ -124,7 +124,7 @@ void Drawer::draw_objects(){
                     if (!((*unit_col) & ALPHA_BIT)){
                         draw_rect_px(x0,y0,x1,y1,*unit_col);
                     }
-                    // ((uint32_t*)render_state.memory)[x0 + y0*render_state.width] = 0;
+                    // ((uint32_t*)render_state.memory)[x0 + y0*render_state.width] = 0; //dot grid to implement somehow in the future
                     // ((uint32_t*)render_state.memory)[x1 + y1*render_state.width] = 0;
                     x0 += unit_size_x_px;
                     x1 += unit_size_x_px;

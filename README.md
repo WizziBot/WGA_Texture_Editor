@@ -14,6 +14,8 @@ You can draw within the darker gray area (with the exception of some small borde
 
 By default the active colour is black, to switch to your imported colours use the keyboard keys 1-9 and 0 for erasing. The indicator in the top left will display the current colour you have selected.
 
+To toggle the dot grid press `G` on your keyboard. This is for drawing assistance and will not be saved with the texture.
+
 To save the work as a .wgat file, press `Ctrl+S` and a submatrix will be cropped from the canvas and saved as `texture.wgat`, you are free to rename this file.
 
 When the editor is opened it will search its directory and subdirectories for .wgat files and it will load the first one it finds into the editor and save it to the same file on `Ctrl+S`. Note that this implies only one file can be in the directory at a time, it is recommended to store made textures in a subfolder and bring them out to the parent folder where the executable is located to edit.

@@ -57,8 +57,6 @@ void process_mouse_down(int mouse_x, int mouse_y){
     int cv_height = cv_unit_size*canvas_height;
     int canvas_horz_border = floor((render_state.width-cv_width)/2 + cv_offsetX);
     int canvas_vert_border = floor((render_state.height-cv_height)/2 + cv_offsetY);
-    cout << "\nUS: " << cv_unit_size << " B: " << canvas_horz_border << " VB: " << canvas_vert_border << endl;
-    cout << "W: " << cv_width << " H: " << cv_height << endl;
     if (within_bounds(canvas_horz_border,mouse_x,cv_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,cv_height+canvas_vert_border)){
         // Find canvas matrix square
         int matrix_x = (mouse_x-canvas_horz_border)/cv_unit_size;

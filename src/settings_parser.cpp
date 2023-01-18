@@ -41,11 +41,12 @@ App_Settings::App_Settings(wga_err* status){
             }
             if (token == COLOURS){
                 lex[lexi] = '\0';
-                int colour = std::stoul(lex,nullptr,16);
+                int colour = (int)std::stoul(lex,nullptr,16);
                 colours.push_back(colour);
             } else if (token == SIZE) {
                 lex[lexi] = '\0';
-                unit_size = std::stoul(lex,nullptr,16);
+                unit_size = (float)std::stoul(lex,nullptr,16);
+                cout << "RUS: " << unit_size << endl;
             }
             lexi = 0;
             token_type = TAG;
@@ -57,11 +58,11 @@ App_Settings::App_Settings(wga_err* status){
         case ',':
             if (token == COLOURS){
                 lex[lexi] = '\0';
-                int colour = std::stoul(lex,nullptr,16);
+                int colour = (int)std::stoul(lex,nullptr,16);
                 colours.push_back(colour);
             } else if (token == SIZE) {
                 lex[lexi] = '\0';
-                unit_size = std::stoul(lex,nullptr,16);
+                unit_size = (float)std::stoul(lex,nullptr,16);
             } else {
                 errndie("Unexpected ',' character")
             }

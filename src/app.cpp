@@ -146,7 +146,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
 }
 
 wga_err get_load_texture_name() {
-    for (auto &p : fs::recursive_directory_iterator()) {
+    for (auto &p : fs::recursive_directory_iterator(".")) {
         if (p.path().extension() == ".wgat"){
             load_texture_name = p.path().generic_string();
             return WGA_SUCCESS;

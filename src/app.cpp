@@ -173,9 +173,9 @@ void load_onto_canvas(uint32_t* matrix, int width, int height){
     int x1 = x0 + width;
     int y1 = y0 + height;
     cv_lower_x = x0;
-    cv_higher_x = x1;
+    cv_higher_x = x1-1;
     cv_lower_y = y0;
-    cv_higher_y = y1;
+    cv_higher_y = y1-1;
     uint32_t* unit = canvas_matrix;
     uint32_t* src = matrix;
     for (int y=y0; y < y1; y++){

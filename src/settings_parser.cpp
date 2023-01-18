@@ -46,7 +46,6 @@ App_Settings::App_Settings(wga_err* status){
             } else if (token == SIZE) {
                 lex[lexi] = '\0';
                 unit_size = (float)std::stoul(lex,nullptr,16);
-                cout << "RUS: " << unit_size << endl;
             }
             lexi = 0;
             token_type = TAG;

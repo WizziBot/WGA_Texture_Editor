@@ -26,8 +26,6 @@ int canvas_width;
 int canvas_height;
 float canvas_unit_size;
 int colours_size;
-float cv_offsetX;
-float cv_offsetY;
 uint32_t active_colour = 0;
 shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
@@ -55,8 +53,8 @@ void process_mouse_down(int mouse_x, int mouse_y){
     int cv_unit_size = floor(canvas_unit_size*factor);
     int cv_width = cv_unit_size*canvas_width;
     int cv_height = cv_unit_size*canvas_height;
-    int canvas_horz_border = floor((render_state.width-cv_width)/2 + cv_offsetX);
-    int canvas_vert_border = floor((render_state.height-cv_height)/2 + cv_offsetY);
+    int canvas_horz_border = floor((float)(render_state.width-cv_width)/2.f);
+    int canvas_vert_border = floor((float)(render_state.height-cv_height)/2.f);
     if (within_bounds(canvas_horz_border,mouse_x,cv_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,cv_height+canvas_vert_border)){
         // Find canvas matrix square
         int matrix_x = (mouse_x-canvas_horz_border)/cv_unit_size;
@@ -158,7 +156,8 @@ wga_err get_load_texture_name() {
 void save_canvas(){
     uint32_t* submatrix = texture_manager->crop_matrix(canvas_matrix,canvas_width,cv_lower_x,cv_lower_y,cv_higher_x,cv_higher_y);
     if (submatrix != NULL){
-        cout << "Width: " << cv_higher_x-cv_lower_x+1 << " Height: " << cv_higher_y-cv_lower_y+1 << " Size: " << canvas_unit_size << endl;
+        cout << "[Matrix] Width: " << cv_higher_x-cv_lower_x+1 << " Height: " << cv_higher_y-cv_lower_y+1 << " Size: " << canvas_unit_size << endl;
+        cout << "[Total] Width: " << (cv_higher_x-cv_lower_x+1)*canvas_unit_size << " Height: " << (cv_higher_y-cv_lower_y+1)*canvas_unit_size << endl;
         wga_err err = texture_manager->save_texture(submatrix,(cv_higher_x-cv_lower_x+1),(cv_higher_y-cv_lower_y+1),canvas_unit_size,load_texture_name);
         if (err == WGA_SUCCESS) cout << "Success: Texture saved" << endl;
         else cerr << "Error writing to file: Texture not saved" << endl;
@@ -174,9 +173,9 @@ void load_onto_canvas(uint32_t* matrix, int width, int height){
     int x1 = x0 + width;
     int y1 = y0 + height;
     cv_lower_x = x0;
-    cv_higher_x = x1;
+    cv_higher_x = x1-1;
     cv_lower_y = y0;
-    cv_higher_y = y1;
+    cv_higher_y = y1-1;
     uint32_t* unit = canvas_matrix;
     uint32_t* src = matrix;
     for (int y=y0; y < y1; y++){
@@ -233,9 +232,8 @@ void render_init(){
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
     float factor = (float)render_state.height/100.f;
-    cv_offsetX = fmod(floor(CANVAS_WIDTH*factor),(float)floor(canvas_unit_size*factor))/(2*factor);
-    cv_offsetY = fmod(floor(CANVAS_HEIGHT*factor),(float)floor(canvas_unit_size*factor))/(2*factor);
-    canvas = texture_manager->create_render_matrix(cv_offsetX,cv_offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
+
+    canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
     texture_manager->create_render_object(canvas,0);
     shared_ptr<Render_Matrix> c_indicator = texture_manager->create_render_matrix(-CANVAS_WIDTH/2 - 3,CANVAS_HEIGHT/2 - 2,1,1,colour_indicator,4,4);
     texture_manager->create_render_object(c_indicator,1);

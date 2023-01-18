@@ -40,7 +40,7 @@
 
 #endif
 
-#define MAX_MATRIX_SIZE 128*128
+#define MAX_MATRIX_SIZE 128*128*4
 #define ALPHA_BIT (uint32_t)(1<<31) //high bit of 32bit unsigned
 #define AB ALPHA_BIT
 

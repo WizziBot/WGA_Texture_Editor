@@ -45,7 +45,7 @@ App_Settings::App_Settings(wga_err* status){
                 colours.push_back(colour);
             } else if (token == SIZE) {
                 lex[lexi] = '\0';
-                unit_size = (float)std::stoul(lex,nullptr,16);
+                unit_size = (float)std::stof(lex,nullptr);
             }
             lexi = 0;
             token_type = TAG;
@@ -61,7 +61,7 @@ App_Settings::App_Settings(wga_err* status){
                 colours.push_back(colour);
             } else if (token == SIZE) {
                 lex[lexi] = '\0';
-                unit_size = (float)std::stoul(lex,nullptr,16);
+                unit_size = (float)std::stof(lex,nullptr);
             } else {
                 errndie("Unexpected ',' character")
             }

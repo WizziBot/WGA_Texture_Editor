@@ -9,12 +9,8 @@
 
 namespace fs = std::filesystem;
 
-// #define CANVAS_UNIT_SIZE 5.f
 #define CANVAS_WIDTH 175.f
 #define CANVAS_HEIGHT 90.f
-// #define CANVAS_MATRIX_WIDTH CANVAS_WIDTH/CANVAS_UNIT_SIZE
-// #define CANVAS_MATRIX_HEIGHT CANVAS_HEIGHT/CANVAS_UNIT_SIZE
-
 
 namespace WinGameAlpha {
 
@@ -29,7 +25,6 @@ int cv_higher_x=0, cv_higher_y=0;
 int canvas_width;
 int canvas_height;
 float canvas_unit_size;
-float canvas_matrix_width;
 int colours_size;
 float cv_offsetX;
 float cv_offsetY;
@@ -62,11 +57,13 @@ void process_mouse_down(int mouse_x, int mouse_y){
     int cv_height = cv_unit_size*canvas_height;
     int canvas_horz_border = floor((render_state.width-cv_width)/2 + cv_offsetX);
     int canvas_vert_border = floor((render_state.height-cv_height)/2 + cv_offsetY);
+    cout << "\nUS: " << cv_unit_size << " B: " << canvas_horz_border << " VB: " << canvas_vert_border << endl;
+    cout << "W: " << cv_width << " H: " << cv_height << endl;
     if (within_bounds(canvas_horz_border,mouse_x,cv_width+canvas_horz_border) && within_bounds(canvas_vert_border,mouse_y,cv_height+canvas_vert_border)){
         // Find canvas matrix square
         int matrix_x = (mouse_x-canvas_horz_border)/cv_unit_size;
         int matrix_y = (mouse_y-canvas_vert_border)/cv_unit_size;
-        int matrix_index = matrix_x + canvas_matrix_width*matrix_y;
+        int matrix_index = matrix_x + canvas_width*matrix_y;
         
         canvas_matrix[matrix_index] = active_colour;
         updates = true;
@@ -90,13 +87,13 @@ void process_mouse_down(int mouse_x, int mouse_y){
             // Sides
             for (int i=cv_lower_y; i <=cv_higher_y; i++){
                 if (mx == cv_lower_x || mx == cv_higher_x){
-                    int cv_index = mx + cv_lower_y*canvas_matrix_width;
+                    int cv_index = mx + cv_lower_y*canvas_width;
                     for (int y = cv_lower_y; y <= cv_higher_y; y++){
                         if (canvas_matrix[cv_index] != ALPHA_BIT){
                             can_reduce = false;
                             break;
                         }
-                        cv_index += canvas_matrix_width;
+                        cv_index += canvas_width;
                     }
                     if (can_reduce){
                         if (mx == cv_lower_x) {
@@ -117,7 +114,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
             // Top & Bottom
             for (int i=cv_lower_x; i <=cv_higher_x; i++){
                 if (my == cv_lower_y || my == cv_higher_y) {
-                    int cv_index = my*canvas_matrix_width + cv_lower_x;
+                    int cv_index = my*canvas_width + cv_lower_x;
                     for (int x = cv_lower_x; x <= cv_higher_x; x++){
                         if (canvas_matrix[cv_index] != ALPHA_BIT){
                             can_reduce = false;
@@ -226,8 +223,7 @@ void render_init(){
     // Setup canvas
     colours_size = settings->get_colours_size();
     if ((canvas_unit_size = settings->get_unit_size()) == 0) canvas_unit_size = ld_unit_size;
-    canvas_matrix_width = CANVAS_WIDTH/canvas_unit_size;
-    canvas_width = floor(canvas_matrix_width);
+    canvas_width = floor(CANVAS_WIDTH/canvas_unit_size);
     canvas_height = floor(CANVAS_HEIGHT/canvas_unit_size);
     cv_higher_x = cv_lower_x = canvas_width/2;
     cv_higher_y = cv_lower_y = canvas_height/2;
@@ -239,8 +235,8 @@ void render_init(){
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
     float factor = (float)render_state.height/100.f;
-    cv_offsetX = fmod(CANVAS_WIDTH*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
-    cv_offsetY = fmod(CANVAS_HEIGHT*factor,(float)floor(canvas_unit_size*factor))/(2*factor);
+    cv_offsetX = fmod(floor(CANVAS_WIDTH*factor),(float)floor(canvas_unit_size*factor))/(2*factor);
+    cv_offsetY = fmod(floor(CANVAS_HEIGHT*factor),(float)floor(canvas_unit_size*factor))/(2*factor);
     canvas = texture_manager->create_render_matrix(cv_offsetX,cv_offsetY,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
     texture_manager->create_render_object(canvas,0);
     shared_ptr<Render_Matrix> c_indicator = texture_manager->create_render_matrix(-CANVAS_WIDTH/2 - 3,CANVAS_HEIGHT/2 - 2,1,1,colour_indicator,4,4);
@@ -256,6 +252,7 @@ void render_update(){
 }
 
 void render_tick(Input& input, float dt){
+    // Add toggle for grid
     if (mouse_down()) {
         // Normalize coordinates
         int mouse_x = input.mouse_state.x_pos;
@@ -270,6 +267,7 @@ void render_tick(Input& input, float dt){
             active_colour = settings->get_active_colour(i);
             colour_indicator[0] = active_colour;
             updates = true;
+            input.buttons[i].down = false;
         }
     }
 

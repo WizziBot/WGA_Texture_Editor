@@ -7,7 +7,7 @@ colour: 0xff0000, 0x00ff00, 0x0000ff
 size: 5
 ```
 the `colour` tag is followed by up to 9 hex codes which will be binded to the keyboard keys 1-9 with 0 being the alpha toggle i.e. the eraser.
-the `size` tag is the width and height of each 'pixel' in relation to a percentage of the window height.
+the `size` tag is the width and height of each 'pixel' in relation to a percentage of the window height. Note that this size will override any saved size within a .wgat file, to use the size within a loaded texture file set the `size` field to 0.
 
 ## Using the editor
 You can draw within the darker gray area (with the exception of some small border which is dependant on how well the pixel size divides).

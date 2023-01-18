@@ -118,16 +118,19 @@ void Drawer::draw_objects(){
 #else
             int mw = (int)matrix->m_width, mh = (int)matrix->m_height;
             uint32_t* unit_col = matrix->m_matrix;
-            for (int y = 0; y < matrix->m_height; y++){
-                for (int x = 0; x < matrix->m_width; x++){
-                    if (!((*unit_col) & ALPHA_BIT))
+            int x,y; 
+            for (y = 0; y < mh; y++){
+                for (x = 0; x < mw; x++){
+                    if (!((*unit_col) & ALPHA_BIT)){
                         draw_rect_px(x0,y0,x1,y1,*unit_col);
-                    ((uint32_t*)render_state.memory)[x0 + y0*render_state.width] = 0;
-                    ((uint32_t*)render_state.memory)[x1 + y1*render_state.width] = 0;
+                    }
+                    // ((uint32_t*)render_state.memory)[x0 + y0*render_state.width] = 0;
+                    // ((uint32_t*)render_state.memory)[x1 + y1*render_state.width] = 0;
                     x0 += unit_size_x_px;
                     x1 += unit_size_x_px;
                     unit_col++;
                 }
+
                 y0 += unit_size_y_px;
                 y1 += unit_size_y_px;
                 x0 = x0_i;

@@ -32,6 +32,7 @@ shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
 shared_ptr<App_Settings> settings;
 bool first_stroke = true;
+bool using_sdims = false;
 
 string load_texture_name;
 
@@ -63,12 +64,15 @@ void process_mouse_down(int mouse_x, int mouse_y){
         
         canvas_matrix[matrix_index] = active_colour;
         updates = true;
+
+        if (using_sdims) return;
+
         // Adjust submatrix boundary
         if ((cv_higher_x-cv_lower_x == 0 || cv_higher_y-cv_lower_y == 0) && first_stroke){
             cv_higher_x = cv_lower_x = matrix_x;
             cv_higher_y = cv_lower_y = matrix_y;
             first_stroke = false;
-        } 
+        }
         if (active_colour != ALPHA_BIT){
             if (matrix_x < cv_lower_x) cv_lower_x = matrix_x;
             if (matrix_y < cv_lower_y) cv_lower_y = matrix_y;
@@ -231,6 +235,44 @@ void render_init(){
         load_onto_canvas(loaded_texture,width,height);
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
+
+    // Strict dims
+    using_sdims = settings->using_sdims();
+    if (using_sdims){
+        int x0 = floor((float)canvas_width/2.f - (float)settings->get_swidth()/2.f);
+        int y0 = floor((float)canvas_height/2.f - (float)settings->get_sheight()/2.f);
+        int x1 = x0 + settings->get_swidth();
+        int y1 = y0 + settings->get_sheight();
+        cv_lower_x = x0;
+        cv_higher_x = x1-1;
+        cv_lower_y = y0;
+        cv_higher_y = y1-1;
+        // Left
+        int cv_index = cv_lower_x-1 + cv_lower_y*canvas_width;
+        for (int y = cv_lower_y; y <= cv_higher_y; y++){
+            canvas_matrix[cv_index] = 0xcc5454;
+            cv_index += canvas_width;
+        }
+        // Right
+        cv_index = cv_higher_x+1 + cv_lower_y*canvas_width;
+        for (int y = cv_lower_y; y <= cv_higher_y; y++){
+            canvas_matrix[cv_index] = 0xcc5454;
+            cv_index += canvas_width;
+        }
+        // Bottom
+        cv_index = (cv_lower_y-1)*canvas_width + cv_lower_x-1;
+        for (int x = cv_lower_x; x <= cv_higher_x+2; x++){
+            canvas_matrix[cv_index] = 0xcc5454;
+            cv_index++;
+        }
+        // Top
+        cv_index = (cv_higher_y+1)*canvas_width + cv_lower_x-1;
+        for (int x = cv_lower_x; x <= cv_higher_x+2; x++){
+            canvas_matrix[cv_index] = 0xcc5454;
+            cv_index++;
+        }
+    }
+
     float factor = (float)render_state.height/100.f;
 
     canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);

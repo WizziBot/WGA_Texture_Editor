@@ -5,10 +5,11 @@ There must be a file named `settings.wgas` in the immediate directory of executi
 ```
 colour: 0xff0000, 0x00ff00, 0x0000ff
 size: 5
+strict_dims: 4,5
 ```
-the `colour` tag is followed by up to 9 hex codes which will be binded to the keyboard keys 1-9 with 0 being the alpha toggle i.e. the eraser.
-the `size` tag is the width and height of each 'pixel' in relation to a percentage of the window height. Note that this size will override any saved size within a .wgat file, to use the size within a loaded texture file set the `size` field to 0.
-
+* The `colour` tag is followed by up to 9 hex codes which will be binded to the keyboard keys 1-9 with 0 being the alpha toggle i.e. the eraser.
+* The `size` tag is the width and height of each 'pixel' in relation to a percentage of the window height. Note that this size will override any saved size within a .wgat file, to use the size within a loaded texture file set the `size` field to 0.
+* The `strict_dims` tag is an *optional* tag to enforce an exact size on the saved texture, this should only be used when making a set of textures that must be the same size, note that the strict dims setting will not prevent you from drawing outside the strict borders.
 ## Using the editor
 You can draw within the darker gray area (with the exception of some small border which is dependant on how well the pixel size divides).
 

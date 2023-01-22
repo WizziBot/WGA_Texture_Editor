@@ -30,26 +30,36 @@ App_Settings::App_Settings(wga_err* status){
     token_t token = NONE;
 
     colours.push_back(0x80000000); // Alpha as 0th element
-    
+    strict_dims = false;
+
+    int field_counter = 0;
     for (int i = 0; i < size; i++){
         switch (buf[i])
         {
         case '\0':
         case '\n':
             if (token_type != BODY){
-                errndie("Unexpected newline character")
+                break;
             }
+            lex[lexi] = '\0';
             if (token == COLOURS){
-                lex[lexi] = '\0';
                 int colour = (int)std::stoul(lex,nullptr,16);
                 colours.push_back(colour);
             } else if (token == SIZE) {
-                lex[lexi] = '\0';
                 unit_size = (float)std::stof(lex,nullptr);
+            } else if (token == DIMS){
+                if (field_counter == 0){
+                    s_width = (int)std::stoul(lex,nullptr,10);
+                } else if (field_counter == 1){
+                    s_height = (int)std::stoul(lex,nullptr,10);
+                } else {
+                    errndie("Strict dims can only take 2 dimensions, unexpected 3rd dimension.")
+                }
             }
             lexi = 0;
             token_type = TAG;
             token = NONE;
+            field_counter = 0;
             break;
         case '\r':
         case ' ':
@@ -62,10 +72,20 @@ App_Settings::App_Settings(wga_err* status){
             } else if (token == SIZE) {
                 lex[lexi] = '\0';
                 unit_size = (float)std::stof(lex,nullptr);
+            } else if (token == DIMS){
+                lex[lexi] = '\0';
+                if (field_counter == 0){
+                    s_width = (int)std::stoi(lex,nullptr,10);
+                } else if (field_counter == 1){
+                    s_height = (int)std::stoi(lex,nullptr,10);
+                } else {
+                    errndie("Strict dims can only take 2 dimensions, unexpected 3rd dimension.")
+                }
             } else {
                 errndie("Unexpected ',' character")
             }
             lexi = 0;
+            field_counter++;
             break;
         case ':':
             if (token_type == TAG){
@@ -74,6 +94,9 @@ App_Settings::App_Settings(wga_err* status){
                     token = COLOURS;
                 } else if (!strncmp(lex,"size",63)){
                     token = SIZE;
+                } else if (!strncmp(lex,"strict_dims",63)){
+                    token = DIMS;
+                    strict_dims = true;
                 } else {
                     warn("Unknown tag '" << lex <<"'")
                 }

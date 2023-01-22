@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-#define CANVAS_WIDTH 175.f
+#define CANVAS_WIDTH 180.f
 #define CANVAS_HEIGHT 90.f
 
 namespace WinGameAlpha {

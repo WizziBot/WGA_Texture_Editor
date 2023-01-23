@@ -139,16 +139,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         QueryPerformanceFrequency(&perf);
         performance_frequency = (float)perf.QuadPart;
     }
-    HINSTANCE hInst = GetModuleHandle(NULL);
     HCURSOR point_cursor = LoadCursorA(NULL,(LPCSTR)IDC_ARROW);
-    // TRACKMOUSEEVENT tme = {
-    //     .dwFlags = TME_HOVER,
-    //     .hwndTrack = window,
-    //     .dwHoverTime = 10
-    // };
-    // tme.cbSize = sizeof(tme);
-    // TrackMouseEvent((LPTRACKMOUSEEVENT)&tme);
-    bool in_wnd = true;
     while (running){
         MSG message;
         for (int i = 0; i < BUTTON_COUNT; i++){

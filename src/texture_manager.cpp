@@ -59,8 +59,8 @@ wga_err Texture_Manager::load_texture(uint32_t** matrix_dst, int* width, int* he
 }
 
 uint32_t* Texture_Manager::crop_matrix(uint32_t* matrix, int matrix_width, int x0, int y0, int x1, int y1){
-    int width = x1-x0;
-    int height = y1-y0;
+    int width = x1-x0+1;
+    int height = y1-y0+1;
     if (width == 0 || height == 0) return NULL;
     uint32_t* submatrix = (uint32_t*)VirtualAlloc(0,width*height*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (submatrix==NULL) return NULL;

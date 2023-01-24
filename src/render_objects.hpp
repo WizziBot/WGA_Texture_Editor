@@ -17,6 +17,7 @@ struct draw_pos {
 };
 
 class Drawer;
+class Texture_Manager;
 
 // RENDER MATRIX
 class Render_Matrix {
@@ -33,7 +34,9 @@ public:
     @param unit_size_y the height of each square unit in relative size
 */
 Render_Matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y);
-
+~Render_Matrix(){
+    VirtualFree(m_matrix,0,MEM_RELEASE);
+}
 void edit_matrix_offset(float x_offset, float y_offset){
     m_x_offset = x_offset;
     m_y_offset = y_offset;
@@ -74,13 +77,56 @@ public:
 Render_Object(shared_ptr<Drawer> drawer, shared_ptr<Render_Matrix> render_matrix, int render_layer, bool is_subclass);
 
 virtual draw_pos draw_get_pos(){
-    draw_pos zero = {0,0};
-    return zero;
+    return m_draw_pos;
 };
 
 protected:
+draw_pos m_draw_pos = {0,0};
 int m_render_layer;
 shared_ptr<Render_Matrix> m_render_matrix;
+
+};
+
+class Character_Library {
+friend class Texture_Manager;
+public:
+
+
+shared_ptr<Render_Matrix> get_character_matrix(char character);
+
+private:
+vector<shared_ptr<Render_Matrix> > character_list;
+int length =0;
+};
+
+class Text_Object {
+public:
+
+Text_Object(shared_ptr<Texture_Manager> texture_manager, string text,float unit_size,int render_layer){
+    m_render_layer = render_layer;
+    m_texture_manager = texture_manager;
+    set_text(text);
+}
+/* Change the text displayed by the text object
+*/
+void change_text(string text){
+    clean_text();
+    set_text(text);
+    display();
+}
+
+private:
+void set_text(string text);
+void clean_text();
+void display();
+shared_ptr<Drawer> m_drawer;
+shared_ptr<Texture_Manager> m_texture_manager;
+shared_ptr<Character_Library> character_library; 
+vector<Render_Object> text_characters;
+vector<int> text_idx;
+string text_literal;
+float unit_size=0;
+int m_render_layer;
 
 };
 

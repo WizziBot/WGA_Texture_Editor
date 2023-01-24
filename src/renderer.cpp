@@ -1,6 +1,7 @@
 #include "core.hpp"
 #include "renderer.hpp"
 #include "render_objects.hpp"
+#include "texture_manager.hpp"
 
 namespace WinGameAlpha{
 
@@ -45,12 +46,18 @@ wga_err Drawer::register_render_object(shared_ptr<Render_Object> render_obj){
         RNDERR("Render layers must be contiguous: invalid render layer id.");
     } else if (render_obj->m_render_layer == render_layers.size()){
         vector<shared_ptr<Render_Object> > render_objs;
+        render_objs.reserve(RENDER_OBJECTS_ALLOCATE_SIZE);
         render_objs.push_back(render_obj);
         render_layers.push_back(render_objs);
     } else {
         render_layers.at(render_obj->m_render_layer).push_back(render_obj);
     }
     return WGA_SUCCESS;
+}
+
+void Drawer::unregister_render_object(int render_layer, int index){
+    vector<vector<shared_ptr<Render_Object> > >::iterator layer = render_layers.begin() + render_layer;
+    (*layer).erase((*layer).begin()+index);
 }
 
 void Drawer::draw_objects(){
@@ -206,6 +213,43 @@ Render_Matrix::Render_Matrix(float x_offset, float y_offset, float width, float 
 : m_x_offset(x_offset), m_y_offset(y_offset), m_width(width), m_height(height), m_matrix(matrix), m_unit_size_x(unit_size_x), m_unit_size_y(unit_size_y) {
     if (width == 0 || height == 0) throw std::invalid_argument("Renderer Error: The width and height of render matrix must be above 0");
     if (width*height > MAX_MATRIX_SIZE) throw std::invalid_argument("Renderer Error: Matrix exdeeded max dim size");
+}
+
+shared_ptr<Render_Matrix> Character_Library::get_character_matrix(char character){
+    if (character >= '0' && character <= '9'){
+        int idx = (int)character - (int)'0';
+        return character_list.at(idx);
+    }
+    return nullptr;
+}
+
+void Text_Object::set_text(string text){
+    string::iterator t;
+    shared_ptr<Render_Matrix> curr_matrix;
+    for (t = text.begin(); t != text.end(); t++){
+        curr_matrix = (*character_library).get_character_matrix(*t);
+        if (curr_matrix != nullptr){
+            text_characters.push_back(Render_Object(m_drawer,curr_matrix,m_render_layer,false));
+        }
+    }
+}
+
+void Text_Object::display(){
+    vector<Render_Object>::iterator iter;
+    for (iter = text_characters.begin(); iter != text_characters.end(); iter++){
+        shared_ptr<Render_Object> new_obj((Render_Object*)iter.base());
+        m_drawer->register_render_object(new_obj);
+        text_idx.push_back(m_drawer->render_layers.at(m_render_layer).size()-1);
+    }
+}
+
+void Text_Object::clean_text(){
+    vector<int>::iterator iter;
+    for (iter = text_idx.begin(); iter != text_idx.end(); iter++){
+        m_drawer->unregister_render_object(m_render_layer,*iter);
+    }
+    text_idx.clear();
+    text_characters.clear();
 }
 
 #ifdef USING_OPENCL // Using OpenCL to render

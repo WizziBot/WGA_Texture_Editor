@@ -4,6 +4,10 @@
 
 namespace WinGameAlpha {
 
+#define TEXEX(msg,err_no) if (err_no != WGA_SUCCESS) { cerr << "Texture Manager Error: " \
+                      << msg << endl;\
+                      return WGA_FAILURE;}
+
 
 class Texture_Manager {
 public:
@@ -13,13 +17,16 @@ public:
 Texture_Manager(shared_ptr<Drawer> drawer){
     m_drawer = drawer;
 }
-/* Render object which contains rectangles to be rendered on each draw() call if registered
+/* Render object which contains matrices to be rendered on each draw() call if registered
     @param render_matrix a pointer to the render matrix texture
     @param render_layer the id of the render layer of the object where the render objects within the layer will be rendered together,
     the render layers must be declared contiguously i.e. layer 0 must exist before layer 1
     @return WGA_SUCCESS on succes and WGA_FAILURE on failure
 */
 void create_render_object(shared_ptr<Render_Matrix> render_matrix, int render_layer);
+/* Load character textures. Initialises the Character_Library and fills it with the Render_Matrix objects retrieved by loading the textures
+*/
+wga_err load_character_textures();
 /* Render matrix is a matrix type texture
     @param x_offset the x_offset from the related object's coordinates
     @param y_offset the y_offset from the related object's coordinates
@@ -59,6 +66,7 @@ static uint32_t* crop_matrix(uint32_t* matrix, int matrix_width, int x0, int y0,
 
 private:
 shared_ptr<Drawer> m_drawer;
+shared_ptr<Character_Library> m_char_lib;
 vector<Render_Object> render_objects;
 vector<shared_ptr<Render_Matrix>> render_matrices;
 };

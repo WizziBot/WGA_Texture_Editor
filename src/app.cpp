@@ -31,16 +31,13 @@ shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
 shared_ptr<App_Settings> settings;
+shared_ptr<Text_Object> score;
 bool first_stroke = true;
 bool using_sdims = false;
 
 string load_texture_name;
 
 // Functions
-
-void app_cleanup(){
-    VirtualFree(canvas_matrix,0,MEM_RELEASE);
-}
 
 inline void memset32(void *m, uint32_t val, size_t count)
 {
@@ -281,6 +278,8 @@ void render_init(){
     texture_manager->create_render_object(c_indicator,1);
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
+    score = make_shared<Text_Object>(texture_manager,"0",4,2);
+
 }
 
 void render_update(){

@@ -214,8 +214,7 @@ void render_init(){
     // Load texture
     int width,height;
     float ld_unit_size;
-    // if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
-    load_texture_name = "texture.wgat";
+    if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
 
     err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
 

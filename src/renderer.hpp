@@ -44,6 +44,7 @@
 #define ALPHA_BIT (uint32_t)(1<<31) //high bit of 32bit unsigned
 #define AB ALPHA_BIT
 #define RENDER_OBJECTS_ALLOCATE_SIZE 5
+#define TEXT_OBJ_ALLOCATE_SIZE 5
 
 namespace WinGameAlpha{
 
@@ -92,7 +93,7 @@ wga_err register_render_object(shared_ptr<Render_Object> render_obj);
     @param render_layer the render layer of the object to remove
     @param index the index of the object within the objects in the render layer
 */
-void unregister_render_object(int render_layer, int index);
+void unregister_render_objects(int render_layer, int start, int size);
 /* Draw rectangle absolute (pixel) coordinates*/
 void draw_rect_px(int x0, int y0, int x1, int y1, uint32_t colour);
 uint32_t m_background_colour=0;

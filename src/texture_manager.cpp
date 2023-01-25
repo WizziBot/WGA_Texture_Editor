@@ -22,7 +22,7 @@ wga_err Texture_Manager::load_character_textures(){
     // Numbers
     char num = '0';
     string curr = "./textures/text/";
-    for (int i=0; i<3;i++){
+    for (int i=0; i<10;i++){
         curr += (num+i);
         curr += ".wgat";
         err = load_texture(&matrix,&width,&height,&unit_size,curr);
@@ -64,12 +64,13 @@ wga_err Texture_Manager::save_texture(uint32_t* matrix, int width, int height, f
 wga_err Texture_Manager::load_texture(uint32_t** matrix_dst, int* width, int* height, float* unit_size, string file_name){
     wga_err err;
     FILE* fd = fopen(file_name.c_str(),"r");
+    cout << "FN: " << file_name << endl;
     if (fd == NULL) {return WGA_FAILURE;}
     int _width,_height;
     float _unit_size;
     int read = fread(&_width,sizeof(int),1,fd);
     read += fread(&_height,sizeof(int),1,fd);
-    read += fread(&_unit_size,sizeof(float),1,fd);
+    read += fread(&_unit_size,sizeof(float),1,fd); 
     uint32_t* matrix = (uint32_t*)VirtualAlloc(0,_width*_height*sizeof(uint32_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     read += fread(matrix,sizeof(uint32_t),_width*_height,fd);
     if (read == _width*_height + 3) err = WGA_SUCCESS;

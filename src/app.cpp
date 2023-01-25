@@ -32,6 +32,7 @@ shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
 shared_ptr<App_Settings> settings;
 shared_ptr<Text_Object> score;
+int score_count=10;
 bool first_stroke = true;
 bool using_sdims = false;
 
@@ -146,7 +147,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
 
 wga_err get_load_texture_name() {
     for (auto &p : fs::recursive_directory_iterator(".")) {
-        if (p.path().extension() == ".wgat"){
+        if (p.path().extension() == ".wgat" && p.path().string().find("textures/") != string::npos){
             load_texture_name = p.path().generic_string();
             return WGA_SUCCESS;
         }
@@ -212,11 +213,11 @@ void render_init(){
     texture_manager->create_render_object(canvas_background,0);
 
     // Load texture
-    int width,height;
+    int width=0,height=0;
     float ld_unit_size;
-    if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
-
-    err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
+    err = get_load_texture_name();
+    if (err == WGA_FAILURE) load_texture_name = "texture.wgat";
+    else err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
 
     // Setup canvas
     colours_size = settings->get_colours_size();
@@ -279,7 +280,11 @@ void render_init(){
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
     texture_manager->load_character_textures();
-    score = make_shared<Text_Object>(drawer,texture_manager,"2023",4,4,2);
+    score = make_shared<Text_Object>(drawer,texture_manager,"9",4,4,2);
+    string out = std::to_string(score_count);
+    cout << "ch1" << endl; 
+    score->change_text("987");
+    cout << "ch2" << endl;
 
 }
 
@@ -292,6 +297,14 @@ void render_update(){
 void render_tick(Input& input, float dt){
     // Add toggle for grid
     if (mouse_down()) {
+        // score_count++;
+        // string out = std::to_string(score_count);
+        // cout << "ch3" << endl;
+        // score->change_text(out);
+        // cout << "ch4" << endl;
+
+        // updates = true;
+
         // Normalize coordinates
         int mouse_x = input.mouse_state.x_pos;
         int mouse_y = render_state.height - input.mouse_state.y_pos;

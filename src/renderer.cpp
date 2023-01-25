@@ -74,10 +74,8 @@ void Drawer::draw_objects(){
     vector<vector<shared_ptr<Render_Object> > >::iterator layer;
     shared_ptr<Render_Matrix> matrix;
     draw_pos offset;
-    int l_count = 0;
     for (layer = render_layers.begin(); layer != render_layers.end(); layer++){
         vector<shared_ptr<Render_Object> >::iterator render_object;
-        l_count++;
         for (render_object = (*layer).begin(); render_object != (*layer).end(); render_object++){
             offset = (*render_object)->draw_get_pos();
             

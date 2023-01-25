@@ -126,7 +126,7 @@ int length =0;
 class Text_Object {
 public:
 
-Text_Object(shared_ptr<Drawer> drawer, shared_ptr<Texture_Manager> texture_manager, string text,float unit_size, int char_width,int render_layer);
+Text_Object(shared_ptr<Drawer> drawer, shared_ptr<Texture_Manager> texture_manager, string text, float offset_x, float offset_y, float unit_size, int char_width,int render_layer);
 /* Change the text displayed by the text object
 */
 void change_text(string text){
@@ -135,7 +135,12 @@ void change_text(string text){
     display();
 }
 
+void set_offset(draw_pos dpos){
+    m_offset = dpos;
+}
+
 private:
+draw_pos m_offset;
 void set_text(string text);
 void clean_text();
 void display();

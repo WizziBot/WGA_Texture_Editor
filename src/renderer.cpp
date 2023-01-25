@@ -226,11 +226,13 @@ shared_ptr<Render_Matrix> Character_Library::get_character_matrix(char character
     return nullptr;
 }
 
-Text_Object::Text_Object(shared_ptr<Drawer> drawer, shared_ptr<Texture_Manager> texture_manager, string text,float unit_size, int char_width,int render_layer){
+Text_Object::Text_Object(shared_ptr<Drawer> drawer, shared_ptr<Texture_Manager> texture_manager, string text, float offset_x, float offset_y, float unit_size, int char_width,int render_layer){
     m_render_layer = render_layer;
     m_texture_manager = texture_manager;
     character_library = m_texture_manager->get_char_lib_ptr();
     m_drawer = drawer;
+    m_offset.x = offset_x;
+    m_offset.y = offset_y;
     m_unit_size = unit_size;
     m_char_width = char_width;
     set_text(text);
@@ -241,7 +243,8 @@ void Text_Object::set_text(string text){
     text_literal = text;
     string::iterator t;
     draw_pos curr_dpos = {.x=0,.y=0};
-    curr_dpos.x = -m_unit_size*((float)m_char_width+1.f)*((float)text.size())/2.f;
+    curr_dpos.x = -m_unit_size*((float)m_char_width+1.f)*((float)text.size())/2.f + m_offset.x;
+    curr_dpos.y = m_offset.y;
     shared_ptr<Render_Matrix> curr_matrix;
     text_characters.reserve(TEXT_OBJ_ALLOCATE_SIZE);
     for (t = text.begin(); t != text.end(); t++){

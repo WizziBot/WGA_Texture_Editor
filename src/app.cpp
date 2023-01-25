@@ -284,7 +284,7 @@ void render_init(){
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
     texture_manager->load_character_textures();
-    score = make_shared<Text_Object>(drawer,texture_manager,"0",3,4,2);
+    score = make_shared<Text_Object>(drawer,texture_manager,"0",0,30,3,4,2);
 
 }
 

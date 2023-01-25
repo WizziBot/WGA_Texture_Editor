@@ -64,7 +64,6 @@ wga_err Texture_Manager::save_texture(uint32_t* matrix, int width, int height, f
 wga_err Texture_Manager::load_texture(uint32_t** matrix_dst, int* width, int* height, float* unit_size, string file_name){
     wga_err err;
     FILE* fd = fopen(file_name.c_str(),"r");
-    cout << "FN: " << file_name << endl;
     if (fd == NULL) {return WGA_FAILURE;}
     int _width,_height;
     float _unit_size;

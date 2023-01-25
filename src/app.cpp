@@ -214,7 +214,7 @@ void render_init(){
 
     // Load texture
     int width=0,height=0;
-    float ld_unit_size;
+    float ld_unit_size = 0;
     err = get_load_texture_name();
     if (err == WGA_FAILURE) load_texture_name = "texture.wgat";
     else err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
@@ -222,6 +222,10 @@ void render_init(){
     // Setup canvas
     colours_size = settings->get_colours_size();
     if ((canvas_unit_size = settings->get_unit_size()) == 0) canvas_unit_size = ld_unit_size;
+    if (canvas_unit_size <= 0) {
+        WGACHECKERRNO("Unable to resolve unit size of canvas",WGA_FAILURE);
+        return;
+    }
     canvas_width = floor(CANVAS_WIDTH/canvas_unit_size);
     canvas_height = floor(CANVAS_HEIGHT/canvas_unit_size);
     cv_higher_x = cv_lower_x = canvas_width/2;
@@ -280,11 +284,7 @@ void render_init(){
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
     texture_manager->load_character_textures();
-    score = make_shared<Text_Object>(drawer,texture_manager,"9",4,4,2);
-    string out = std::to_string(score_count);
-    cout << "ch1" << endl; 
-    score->change_text("987");
-    cout << "ch2" << endl;
+    score = make_shared<Text_Object>(drawer,texture_manager,"0",3,4,2);
 
 }
 
@@ -297,13 +297,10 @@ void render_update(){
 void render_tick(Input& input, float dt){
     // Add toggle for grid
     if (mouse_down()) {
-        // score_count++;
-        // string out = std::to_string(score_count);
-        // cout << "ch3" << endl;
-        // score->change_text(out);
-        // cout << "ch4" << endl;
-
-        // updates = true;
+        score_count++;
+        string out = std::to_string(score_count);
+        score->change_text(out);
+        updates = true;
 
         // Normalize coordinates
         int mouse_x = input.mouse_state.x_pos;

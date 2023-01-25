@@ -50,7 +50,6 @@ wga_err Drawer::register_render_object(shared_ptr<Render_Object> render_obj){
         render_objs.push_back(render_obj);
         render_layers.push_back(render_objs);
     } else {
-        cout << "LL" << endl;
         render_layers.at(render_obj->m_render_layer).push_back(render_obj);
     }
     return WGA_SUCCESS;
@@ -58,11 +57,7 @@ wga_err Drawer::register_render_object(shared_ptr<Render_Object> render_obj){
 
 void Drawer::unregister_render_objects(int render_layer, int start, int size){
     vector<vector<shared_ptr<Render_Object> > >::iterator layer = render_layers.begin() + render_layer;
-    cout << "RL: " << render_layer << " ST: " << start << " SZ: " << size << endl;
-    cout << "LS: " << (*layer).size() << " " << *((*layer).begin()+start) << " " << *((*layer).begin()+size) << endl;
     (*layer).erase((*layer).begin()+start,(*layer).begin()+size);
-    cout << "LS: " << (*layer).size() << endl;
-    cout << "end" << endl;
 }
 
 void Drawer::draw_objects(){
@@ -87,8 +82,8 @@ void Drawer::draw_objects(){
             offset = (*render_object)->draw_get_pos();
             
             matrix = (*render_object)->m_render_matrix;
-            int unit_size_x_px = floor(matrix->m_unit_size_x*factor);
-            int unit_size_y_px = floor(matrix->m_unit_size_y*factor);
+            int unit_size_x_px = floor((*render_object)->r_unit_size_x*factor);
+            int unit_size_y_px = floor((*render_object)->r_unit_size_y*factor);
             int matrix_width = (int)matrix->m_width*unit_size_x_px;
             int matrix_height = (int)matrix->m_height*unit_size_y_px;
             int x0_i = render_state.width/2 + floor((offset.x + matrix->m_x_offset)*factor) - matrix_width/2;
@@ -210,6 +205,9 @@ Render_Object::Render_Object(shared_ptr<Drawer> drawer, shared_ptr<Render_Matrix
 : m_render_layer(render_layer){
     if (render_matrix == NULL) throw std::invalid_argument("Renderer Error: The render matrix must not be null");
     m_render_matrix = render_matrix;
+    unit_dims udims = m_render_matrix->get_unit_dims();
+    r_unit_size_x = udims.x;
+    r_unit_size_y = udims.y;
     if (is_subclass) {
         shared_ptr<Render_Object> this_obj(this);
         WGAERRCHECK(drawer->register_render_object(this_obj));
@@ -219,14 +217,12 @@ Render_Object::Render_Object(shared_ptr<Drawer> drawer, shared_ptr<Render_Matrix
 Render_Matrix::Render_Matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y)
 : m_x_offset(x_offset), m_y_offset(y_offset), m_width(width), m_height(height), m_matrix(matrix), m_unit_size_x(unit_size_x), m_unit_size_y(unit_size_y) {
     if (width == 0 || height == 0) throw std::invalid_argument("Renderer Error: The width and height of render matrix must be above 0");
-    cout << "CRMAT: " << width << ", " << height << endl;
     if (width*height > MAX_MATRIX_SIZE) throw std::invalid_argument("Renderer Error: Matrix exceeded max dim size");
 }
 
 shared_ptr<Render_Matrix> Character_Library::get_character_matrix(char character){
     if (character >= '0' && character <= '9'){
         int idx = (int)character - (int)'0';
-        cout << "IDX " << idx << endl;
         return character_list.at(idx);
     }
     return nullptr;
@@ -244,49 +240,38 @@ Text_Object::Text_Object(shared_ptr<Drawer> drawer, shared_ptr<Texture_Manager> 
 }
 
 void Text_Object::set_text(string text){
-    cout << "3" <<endl;
     text_literal = text;
-    cout << text << " " << text_literal << endl;
     string::iterator t;
     draw_pos curr_dpos = {.x=0,.y=0};
-    curr_dpos.x = -m_unit_size*((float)m_char_width)*((float)text.size())/2.f;
+    curr_dpos.x = -m_unit_size*((float)m_char_width+1.f)*((float)text.size())/2.f;
     shared_ptr<Render_Matrix> curr_matrix;
     text_characters.reserve(TEXT_OBJ_ALLOCATE_SIZE);
-    cout << "A" << endl;
     for (t = text.begin(); t != text.end(); t++){
         curr_matrix = (*character_library).get_character_matrix(*t);
         if (curr_matrix != nullptr){
-            cout << "MATIN" << endl;
-            text_characters.push_back(Render_Object(m_drawer,curr_matrix,m_render_layer,false));
-            text_characters.back().draw_set_pos(curr_dpos);
+            shared_ptr<Render_Object> new_obj = make_shared<Render_Object>(m_drawer,curr_matrix,m_render_layer,false);
+            new_obj->draw_set_pos(curr_dpos);
+            new_obj->set_unit_dims((unit_dims){.x=m_unit_size,.y=m_unit_size});
+            text_characters.push_back(new_obj);
             curr_dpos.x += m_unit_size*(m_char_width+1);
         }
     }
-    cout << "4" << endl;
 }
 
 void Text_Object::display(){
-    cout<< "5" << endl;
-    vector<Render_Object>::iterator iter;
+    vector<shared_ptr<Render_Object>>::iterator iter;
     for (iter = text_characters.begin(); iter != text_characters.end(); iter++){
-        shared_ptr<Render_Object> new_obj((Render_Object*)iter.base());
-        cout << "nj " << new_obj.use_count() << endl;
-        m_drawer->register_render_object(new_obj);
-        cout << "njp " << new_obj.use_count() << endl;
+        m_drawer->register_render_object(*iter);
         if (iter == text_characters.begin()){
             text_idx = m_drawer->render_layers.at(m_render_layer).size()-1;
         }
     }
-    cout << "6" << endl;
 }
 
 void Text_Object::clean_text(){
-    cout << "1" << endl;
     m_drawer->unregister_render_objects(m_render_layer,text_idx,text_literal.size());
     text_idx = 0;
-    cout << "1.5" << endl;
     text_characters.erase(text_characters.begin(),text_characters.end());
-    cout << "2" << endl;
 }
 
 #ifdef USING_OPENCL // Using OpenCL to render

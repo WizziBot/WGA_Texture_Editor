@@ -18,10 +18,12 @@ struct draw_pos {
 
 class Drawer;
 class Texture_Manager;
+class Text_Object;
 
 // RENDER MATRIX
 class Render_Matrix {
 friend class Drawer;
+friend class Text_Object;
 public:
 
 /* Render matrix is a matrix type texture
@@ -80,6 +82,10 @@ virtual draw_pos draw_get_pos(){
     return m_draw_pos;
 };
 
+void draw_set_pos(draw_pos dpos){
+    m_draw_pos = dpos;
+}
+
 protected:
 draw_pos m_draw_pos = {0,0};
 int m_render_layer;
@@ -102,11 +108,7 @@ int length =0;
 class Text_Object {
 public:
 
-Text_Object(shared_ptr<Texture_Manager> texture_manager, string text,float unit_size,int render_layer){
-    m_render_layer = render_layer;
-    m_texture_manager = texture_manager;
-    set_text(text);
-}
+Text_Object(shared_ptr<Drawer> drawer, shared_ptr<Texture_Manager> texture_manager, string text,float unit_size, int char_width,int render_layer);
 /* Change the text displayed by the text object
 */
 void change_text(string text){
@@ -121,13 +123,13 @@ void clean_text();
 void display();
 shared_ptr<Drawer> m_drawer;
 shared_ptr<Texture_Manager> m_texture_manager;
-shared_ptr<Character_Library> character_library; 
+Character_Library* character_library; 
 vector<Render_Object> text_characters;
 vector<int> text_idx;
 string text_literal;
-float unit_size=0;
+float m_unit_size=0;
 int m_render_layer;
-
+int m_char_width;
 };
 
 }

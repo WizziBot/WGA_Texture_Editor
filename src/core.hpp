@@ -5,12 +5,10 @@
 #include <memory>
 #include <string>
 #include <math.h>
-#include <utility>
 
 using std::shared_ptr;
 using std::make_shared;
 using std::string;
-using std::pair;
 
 // Enable OpenCL
 // #define USING_OPENCL

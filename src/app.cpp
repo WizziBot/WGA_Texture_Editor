@@ -214,7 +214,8 @@ void render_init(){
     // Load texture
     int width,height;
     float ld_unit_size;
-    if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
+    // if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
+    load_texture_name = "texture.wgat";
 
     err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
 
@@ -278,7 +279,8 @@ void render_init(){
     texture_manager->create_render_object(c_indicator,1);
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
-    score = make_shared<Text_Object>(texture_manager,"0",4,2);
+    texture_manager->load_character_textures();
+    score = make_shared<Text_Object>(drawer,texture_manager,"2023",4,4,2);
 
 }
 

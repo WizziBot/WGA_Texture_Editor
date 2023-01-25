@@ -15,8 +15,6 @@ shared_ptr<Render_Matrix> Texture_Manager::create_render_matrix(float x_offset, 
 wga_err Texture_Manager::load_character_textures(){
     wga_err err;
 
-    m_char_lib = make_shared<Character_Library>();
-
     // Load character textures into char lib
     int width, height;
     float unit_size;
@@ -24,7 +22,7 @@ wga_err Texture_Manager::load_character_textures(){
     // Numbers
     char num = '0';
     string curr = "./textures/text/";
-    for (int i=0; i<10;i++){
+    for (int i=0; i<3;i++){
         curr += (num+i);
         curr += ".wgat";
         err = load_texture(&matrix,&width,&height,&unit_size,curr);
@@ -32,7 +30,7 @@ wga_err Texture_Manager::load_character_textures(){
         curr = "./textures/text/";
 
         shared_ptr<Render_Matrix> temp = create_render_matrix(0,0,width,height,matrix,unit_size,unit_size);
-        (*m_char_lib).character_list.push_back(temp);
+        m_char_lib.character_list.push_back(temp);
     }
 
     return WGA_SUCCESS;

@@ -212,7 +212,7 @@ Render_Object::Render_Object(shared_ptr<Drawer> drawer, shared_ptr<Render_Matrix
 Render_Matrix::Render_Matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y)
 : m_x_offset(x_offset), m_y_offset(y_offset), m_width(width), m_height(height), m_matrix(matrix), m_unit_size_x(unit_size_x), m_unit_size_y(unit_size_y) {
     if (width == 0 || height == 0) throw std::invalid_argument("Renderer Error: The width and height of render matrix must be above 0");
-    if (width*height > MAX_MATRIX_SIZE) throw std::invalid_argument("Renderer Error: Matrix exdeeded max dim size");
+    if (width*height > MAX_MATRIX_SIZE) throw std::invalid_argument("Renderer Error: Matrix exceeded max dim size");
 }
 
 shared_ptr<Render_Matrix> Character_Library::get_character_matrix(char character){
@@ -223,13 +223,28 @@ shared_ptr<Render_Matrix> Character_Library::get_character_matrix(char character
     return nullptr;
 }
 
+Text_Object::Text_Object(shared_ptr<Drawer> drawer, shared_ptr<Texture_Manager> texture_manager, string text,float unit_size, int char_width,int render_layer){
+    m_render_layer = render_layer;
+    m_texture_manager = texture_manager;
+    character_library = m_texture_manager->get_char_lib_ptr();
+    m_drawer = drawer;
+    m_unit_size = unit_size;
+    m_char_width = char_width;
+    set_text(text);
+    display();
+}
+
 void Text_Object::set_text(string text){
     string::iterator t;
+    draw_pos curr_dpos = {.x=0,.y=0};
+    curr_dpos.x = -m_unit_size*((float)m_char_width)*((float)text.size())/2.f;
     shared_ptr<Render_Matrix> curr_matrix;
     for (t = text.begin(); t != text.end(); t++){
         curr_matrix = (*character_library).get_character_matrix(*t);
         if (curr_matrix != nullptr){
             text_characters.push_back(Render_Object(m_drawer,curr_matrix,m_render_layer,false));
+            text_characters.back().draw_set_pos(curr_dpos);
+            curr_dpos.x += m_unit_size*(m_char_width+1);
         }
     }
 }

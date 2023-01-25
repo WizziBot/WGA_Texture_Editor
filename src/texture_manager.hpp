@@ -64,9 +64,12 @@ static wga_err load_texture(uint32_t** matrix_dst, int* width, int* height, floa
 */
 static uint32_t* crop_matrix(uint32_t* matrix, int matrix_width, int x0, int y0, int x1, int y1);
 
+Character_Library* get_char_lib_ptr(){
+    return &m_char_lib;
+}
 private:
 shared_ptr<Drawer> m_drawer;
-shared_ptr<Character_Library> m_char_lib;
+Character_Library m_char_lib;
 vector<Render_Object> render_objects;
 vector<shared_ptr<Render_Matrix>> render_matrices;
 };

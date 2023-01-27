@@ -32,7 +32,9 @@ shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
 shared_ptr<App_Settings> settings;
 shared_ptr<Text_Object> score;
-int score_count=10;
+shared_ptr<Text_Object> score2;
+int score_count=0;
+int score_count2=0;
 bool first_stroke = true;
 bool using_sdims = false;
 
@@ -285,6 +287,7 @@ void render_init(){
     drawer->set_background_colour(BACKGROUND_COLOUR);
     texture_manager->load_character_textures();
     score = make_shared<Text_Object>(drawer,texture_manager,"0",0,30,3,4,2);
+    score2 = make_shared<Text_Object>(drawer,texture_manager,"0",0,-30,3,4,3);
 
 }
 
@@ -298,8 +301,11 @@ void render_tick(Input& input, float dt){
     // Add toggle for grid
     if (mouse_down()) {
         score_count++;
+        score_count2 += 5;
         string out = std::to_string(score_count);
+        string out2 = std::to_string(score_count2);
         score->change_text(out);
+        score2->change_text(out2);
         updates = true;
 
         // Normalize coordinates

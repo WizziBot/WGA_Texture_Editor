@@ -168,7 +168,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
 
 wga_err get_load_texture_name() {
     for (auto &p : fs::recursive_directory_iterator(".")) {
-        if (p.path().extension() == ".wgat" && p.path().string().find("textures/") != string::npos){
+        if (p.path().extension() == ".wgat" && p.path().string().find("textures\\") == string::npos){
             load_texture_name = p.path().generic_string();
             return WGA_SUCCESS;
         }
@@ -308,7 +308,7 @@ void render_init(){
     texture_manager->load_character_textures();
     drw_width = make_shared<Text_Object>(drawer,texture_manager,"0",77,42,TEXT_SIZE,texture_manager->get_char_width(),TEXT_RENDER_LAYER);
     drw_height = make_shared<Text_Object>(drawer,texture_manager,"0",87,42,TEXT_SIZE,texture_manager->get_char_width(),TEXT_RENDER_LAYER);
-
+    update_drw_dims(cv_higher_x-cv_lower_x+1,cv_higher_y-cv_lower_y+1);
 }
 
 void render_update(){

@@ -28,7 +28,7 @@ wga_err Texture_Manager::load_character_textures(){
         err = load_texture(&matrix,&width,&height,&unit_size,curr);
         TEXEX("Could not load texture " << curr,err)
         curr = "./textures/text/";
-
+        if (i==0) m_char_width = width;
         shared_ptr<Render_Matrix> temp = create_render_matrix(0,0,width,height,matrix,unit_size,unit_size);
         m_char_lib.character_list.push_back(temp);
     }

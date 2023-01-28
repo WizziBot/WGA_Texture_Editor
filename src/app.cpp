@@ -12,6 +12,10 @@ namespace fs = std::filesystem;
 #define CANVAS_HEIGHT 95.f
 #define BACKGROUND_COLOUR 0x252526
 #define ARENA_COLOUR 0x1e1e1e
+#define CANVAS_RENDER_LAYER 0
+#define INDICATOR_RENDER_LAYER 1
+#define TEXT_RENDER_LAYER 2
+#define TEXT_SIZE 0.5
 
 namespace WinGameAlpha {
 
@@ -32,10 +36,8 @@ shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
 shared_ptr<App_Settings> settings;
-shared_ptr<Text_Object> score;
-shared_ptr<Text_Object> score2;
-int score_count=0;
-int score_count2=0;
+shared_ptr<Text_Object> drw_width;
+shared_ptr<Text_Object> drw_height;
 bool first_stroke = true;
 bool using_sdims = false;
 string load_texture_name;
@@ -53,6 +55,13 @@ inline void memset32(void *m, uint32_t val, size_t count)
 {
     uint32_t *buf = (uint32_t*)m;
     while(count--) *buf++ = val;
+}
+
+void update_drw_dims(int width, int height){
+    string w = std::to_string(width);
+    string h = std::to_string(height);
+    drw_width->change_text(w);
+    drw_height->change_text(h);
 }
 
 void process_mouse_down(int mouse_x, int mouse_y){
@@ -73,7 +82,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
         updates = true;
 
         if (using_sdims) return;
-
+        bool changed = false;
         // Adjust submatrix boundary
         if ((cv_higher_x-cv_lower_x == 0 || cv_higher_y-cv_lower_y == 0) && first_stroke){
             cv_higher_x = cv_lower_x = matrix_x;
@@ -81,10 +90,10 @@ void process_mouse_down(int mouse_x, int mouse_y){
             first_stroke = false;
         }
         if (active_colour != ALPHA_BIT){
-            if (matrix_x < cv_lower_x) cv_lower_x = matrix_x;
-            if (matrix_y < cv_lower_y) cv_lower_y = matrix_y;
-            if (matrix_x > cv_higher_x) cv_higher_x = matrix_x;
-            if (matrix_y > cv_higher_y) cv_higher_y = matrix_y;
+            if (matrix_x < cv_lower_x) cv_lower_x = matrix_x, changed = true;
+            if (matrix_y < cv_lower_y) cv_lower_y = matrix_y, changed = true;
+            if (matrix_x > cv_higher_x) cv_higher_x = matrix_x, changed = true;
+            if (matrix_y > cv_higher_y) cv_higher_y = matrix_y, changed = true;
         } else {
             bool can_reduce = true;
             // Calculate whether to decrement submatrix boundary
@@ -111,6 +120,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
                             cv_higher_x--;
                             mx--;
                         }
+                        changed = true;
                     } else {
                         break;
                     }
@@ -138,6 +148,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
                             cv_higher_y--;
                             my--;
                         }
+                        changed = true;
                     } else {
                         break;
                     }
@@ -151,6 +162,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
                 first_stroke = true;
             }
         }
+        if (changed) update_drw_dims(cv_higher_x-cv_lower_x+1,cv_higher_y-cv_lower_y+1);
     }
 }
 
@@ -288,14 +300,14 @@ void render_init(){
     float factor = (float)render_state.height/100.f;
 
     canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
-    texture_manager->create_render_object(canvas,0);
+    texture_manager->create_render_object(canvas,CANVAS_RENDER_LAYER);
     shared_ptr<Render_Matrix> c_indicator = texture_manager->create_render_matrix(-CANVAS_WIDTH/2 - 3,CANVAS_HEIGHT/2 - 2,1,1,colour_indicator,4,4);
-    texture_manager->create_render_object(c_indicator,1);
+    texture_manager->create_render_object(c_indicator,INDICATOR_RENDER_LAYER);
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
     texture_manager->load_character_textures();
-    score = make_shared<Text_Object>(drawer,texture_manager,"0",0,30,3,4,2);
-    score2 = make_shared<Text_Object>(drawer,texture_manager,"0",0,-30,3,4,3);
+    drw_width = make_shared<Text_Object>(drawer,texture_manager,"0",77,42,TEXT_SIZE,texture_manager->get_char_width(),TEXT_RENDER_LAYER);
+    drw_height = make_shared<Text_Object>(drawer,texture_manager,"0",87,42,TEXT_SIZE,texture_manager->get_char_width(),TEXT_RENDER_LAYER);
 
 }
 
@@ -308,14 +320,6 @@ void render_update(){
 void render_tick(Input& input, float dt){
     // Add toggle for grid
     if (mouse_down()) {
-        score_count++;
-        score_count2 += 5;
-        string out = std::to_string(score_count);
-        string out2 = std::to_string(score_count2);
-        score->change_text(out);
-        score2->change_text(out2);
-        updates = true;
-
         // Normalize coordinates
         int mouse_x = input.mouse_state.x_pos;
         int mouse_y = render_state.height - input.mouse_state.y_pos;

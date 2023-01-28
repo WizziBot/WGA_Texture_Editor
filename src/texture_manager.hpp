@@ -67,9 +67,15 @@ static uint32_t* crop_matrix(uint32_t* matrix, int matrix_width, int x0, int y0,
 Character_Library* get_char_lib_ptr(){
     return &m_char_lib;
 }
+
+int get_char_width(){
+    return m_char_width;
+}
+
 private:
 shared_ptr<Drawer> m_drawer;
 Character_Library m_char_lib;
+int m_char_width=0;
 vector<Render_Object> render_objects;
 vector<shared_ptr<Render_Matrix>> render_matrices;
 };

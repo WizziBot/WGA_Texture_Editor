@@ -32,8 +32,12 @@ List of replaceable objects/textures within WGA and their dimensions in normalis
 
 The following list contains the name of each file that must be included in the WGA textures directory and how it will be imported.
 
+#### Game objects
 * `player.wgat` Width: 5, Height: 20, Description: The ambient player texture.
 * `player_bounce.wgat` Width: 5, Height: 20, Description: The texture displayed after a collision with the ball.
 * `ball.wgat` Width: 2, Height: 2, Description: The ambient ball texture.
 * `ball_bounce.wgat` Width: 2, Height: 2, Description: The texture displayed after a collision with the player.
 * `arena.wgat` Width: 180, Height: 90, Description: The texture of the arena during game time.
+
+#### Text
+Stored in the subdirectory `./textures/text` each character `0.wgat` through `9.wgat` should be imported in uniform dimensions i.e. the strict_dims setting should be used when designing text type textures for all characters 0-9 with the same dims.

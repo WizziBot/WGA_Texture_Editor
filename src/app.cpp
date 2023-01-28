@@ -1,6 +1,5 @@
 
 #include "app.hpp"
-#include "textures.hpp"
 #include "render_objects.hpp"
 #include "texture_manager.hpp"
 #include "renderer.hpp"
@@ -11,6 +10,8 @@ namespace fs = std::filesystem;
 
 #define CANVAS_WIDTH 185.f
 #define CANVAS_HEIGHT 95.f
+#define BACKGROUND_COLOUR 0x252526
+#define ARENA_COLOUR 0x1e1e1e
 
 namespace WinGameAlpha {
 
@@ -37,8 +38,14 @@ int score_count=0;
 int score_count2=0;
 bool first_stroke = true;
 bool using_sdims = false;
-
 string load_texture_name;
+
+uint32_t colour_indicator[] {
+    0x000000
+};
+uint32_t background_matrix[] {
+    ARENA_COLOUR
+};
 
 // Functions
 
@@ -210,6 +217,7 @@ void render_init(){
         WGACHECKERRNO("Failed to instantiate texture_manager.",err);
         return;
     }
+
     // Canvas background
     shared_ptr<Render_Matrix> canvas_background = texture_manager->create_render_matrix(0,0,1,1,background_matrix,CANVAS_WIDTH,CANVAS_HEIGHT);
     texture_manager->create_render_object(canvas_background,0);

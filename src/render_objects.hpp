@@ -102,6 +102,10 @@ void set_unit_dims(unit_dims udims){
     r_unit_size_y = udims.y;
 }
 
+void append_render_matrix(shared_ptr<Render_Matrix> render_matrix){
+    m_render_matrices.push_back(render_matrix);
+}
+
 void switch_active_matrix(int index){
     if (index < m_render_matrices.size() && index >=0){
         m_render_matrix = m_render_matrices.at(index);

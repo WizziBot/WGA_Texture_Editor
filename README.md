@@ -30,8 +30,10 @@ When saving your texture, the size used is also saved onto the .wgat file and wh
 ### WGA Objects Reference
 List of replaceable objects/textures within WGA and their dimensions in normalised coordinates (the same dimensions of the size of your brush). These are not strict requirements but guidelines to know how large to make certain textures.
 
-* `Player` Width: 5, Height: 20, Name: `player.wgat`
-* `Ball` Width: 2, Height: 2, Name: `ball.wgat`
-* `Arena` Width: 180, Height: 90, Name: `arena.wgat`
+The following list contains the name of each file that must be included in the WGA textures directory and how it will be imported.
 
-The `Name` field is what the file must be saved as within the `textures` folder that should be in the same directory as the WinGameAlpha executable.
+* `player.wgat` Width: 5, Height: 20, Description: The ambient player texture.
+* `player_bounce.wgat` Width: 5, Height: 20, Description: The texture displayed after a collision with the ball.
+* `ball.wgat` Width: 2, Height: 2, Description: The ambient ball texture.
+* `ball_bounce.wgat` Width: 2, Height: 2, Description: The texture displayed after a collision with the player.
+* `arena.wgat` Width: 180, Height: 90, Description: The texture of the arena during game time.

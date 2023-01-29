@@ -1,6 +1,5 @@
 
 #include "app.hpp"
-#include "textures.hpp"
 #include "render_objects.hpp"
 #include "texture_manager.hpp"
 #include "renderer.hpp"
@@ -9,8 +8,14 @@
 
 namespace fs = std::filesystem;
 
-#define CANVAS_WIDTH 175.f
-#define CANVAS_HEIGHT 90.f
+#define CANVAS_WIDTH 185.f
+#define CANVAS_HEIGHT 95.f
+#define BACKGROUND_COLOUR 0x252526
+#define ARENA_COLOUR 0x1e1e1e
+#define CANVAS_RENDER_LAYER 0
+#define INDICATOR_RENDER_LAYER 1
+#define TEXT_RENDER_LAYER 2
+#define TEXT_SIZE 0.5
 
 namespace WinGameAlpha {
 
@@ -31,20 +36,32 @@ shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
 shared_ptr<Render_Matrix> canvas;
 shared_ptr<App_Settings> settings;
+shared_ptr<Text_Object> drw_width;
+shared_ptr<Text_Object> drw_height;
 bool first_stroke = true;
-
+bool using_sdims = false;
 string load_texture_name;
 
-// Functions
+uint32_t colour_indicator[] {
+    0x000000
+};
+uint32_t background_matrix[] {
+    ARENA_COLOUR
+};
 
-void app_cleanup(){
-    VirtualFree(canvas_matrix,0,MEM_RELEASE);
-}
+// Functions
 
 inline void memset32(void *m, uint32_t val, size_t count)
 {
     uint32_t *buf = (uint32_t*)m;
     while(count--) *buf++ = val;
+}
+
+void update_drw_dims(int width, int height){
+    string w = std::to_string(width);
+    string h = std::to_string(height);
+    drw_width->change_text(w);
+    drw_height->change_text(h);
 }
 
 void process_mouse_down(int mouse_x, int mouse_y){
@@ -63,17 +80,20 @@ void process_mouse_down(int mouse_x, int mouse_y){
         
         canvas_matrix[matrix_index] = active_colour;
         updates = true;
+
+        if (using_sdims) return;
+        bool changed = false;
         // Adjust submatrix boundary
         if ((cv_higher_x-cv_lower_x == 0 || cv_higher_y-cv_lower_y == 0) && first_stroke){
             cv_higher_x = cv_lower_x = matrix_x;
             cv_higher_y = cv_lower_y = matrix_y;
             first_stroke = false;
-        } 
+        }
         if (active_colour != ALPHA_BIT){
-            if (matrix_x < cv_lower_x) cv_lower_x = matrix_x;
-            if (matrix_y < cv_lower_y) cv_lower_y = matrix_y;
-            if (matrix_x > cv_higher_x) cv_higher_x = matrix_x;
-            if (matrix_y > cv_higher_y) cv_higher_y = matrix_y;
+            if (matrix_x < cv_lower_x) cv_lower_x = matrix_x, changed = true;
+            if (matrix_y < cv_lower_y) cv_lower_y = matrix_y, changed = true;
+            if (matrix_x > cv_higher_x) cv_higher_x = matrix_x, changed = true;
+            if (matrix_y > cv_higher_y) cv_higher_y = matrix_y, changed = true;
         } else {
             bool can_reduce = true;
             // Calculate whether to decrement submatrix boundary
@@ -100,6 +120,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
                             cv_higher_x--;
                             mx--;
                         }
+                        changed = true;
                     } else {
                         break;
                     }
@@ -127,6 +148,7 @@ void process_mouse_down(int mouse_x, int mouse_y){
                             cv_higher_y--;
                             my--;
                         }
+                        changed = true;
                     } else {
                         break;
                     }
@@ -140,12 +162,13 @@ void process_mouse_down(int mouse_x, int mouse_y){
                 first_stroke = true;
             }
         }
+        if (changed) update_drw_dims(cv_higher_x-cv_lower_x+1,cv_higher_y-cv_lower_y+1);
     }
 }
 
 wga_err get_load_texture_name() {
     for (auto &p : fs::recursive_directory_iterator(".")) {
-        if (p.path().extension() == ".wgat"){
+        if (p.path().extension() == ".wgat" && p.path().string().find("textures\\") == string::npos){
             load_texture_name = p.path().generic_string();
             return WGA_SUCCESS;
         }
@@ -206,20 +229,25 @@ void render_init(){
         WGACHECKERRNO("Failed to instantiate texture_manager.",err);
         return;
     }
+
     // Canvas background
     shared_ptr<Render_Matrix> canvas_background = texture_manager->create_render_matrix(0,0,1,1,background_matrix,CANVAS_WIDTH,CANVAS_HEIGHT);
     texture_manager->create_render_object(canvas_background,0);
 
     // Load texture
-    int width,height;
-    float ld_unit_size;
-    if (get_load_texture_name() == WGA_FAILURE) load_texture_name = "texture.wgat";
-
-    err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
+    int width=0,height=0;
+    float ld_unit_size = 0;
+    err = get_load_texture_name();
+    if (err == WGA_FAILURE) load_texture_name = "texture.wgat";
+    else err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
 
     // Setup canvas
     colours_size = settings->get_colours_size();
     if ((canvas_unit_size = settings->get_unit_size()) == 0) canvas_unit_size = ld_unit_size;
+    if (canvas_unit_size <= 0) {
+        WGACHECKERRNO("Unable to resolve unit size of canvas",WGA_FAILURE);
+        return;
+    }
     canvas_width = floor(CANVAS_WIDTH/canvas_unit_size);
     canvas_height = floor(CANVAS_HEIGHT/canvas_unit_size);
     cv_higher_x = cv_lower_x = canvas_width/2;
@@ -231,14 +259,56 @@ void render_init(){
         load_onto_canvas(loaded_texture,width,height);
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
+
+    // Strict dims
+    using_sdims = settings->using_sdims();
+    if (using_sdims){
+        int x0 = floor((float)canvas_width/2.f - (float)settings->get_swidth()/2.f);
+        int y0 = floor((float)canvas_height/2.f - (float)settings->get_sheight()/2.f);
+        int x1 = x0 + settings->get_swidth();
+        int y1 = y0 + settings->get_sheight();
+        cv_lower_x = x0;
+        cv_higher_x = x1-1;
+        cv_lower_y = y0;
+        cv_higher_y = y1-1;
+        // Left
+        int cv_index = cv_lower_x-1 + cv_lower_y*canvas_width;
+        for (int y = cv_lower_y; y <= cv_higher_y; y++){
+            canvas_matrix[cv_index] = 0xcc5454;
+            cv_index += canvas_width;
+        }
+        // Right
+        cv_index = cv_higher_x+1 + cv_lower_y*canvas_width;
+        for (int y = cv_lower_y; y <= cv_higher_y; y++){
+            canvas_matrix[cv_index] = 0xcc5454;
+            cv_index += canvas_width;
+        }
+        // Bottom
+        cv_index = (cv_lower_y-1)*canvas_width + cv_lower_x-1;
+        for (int x = cv_lower_x; x <= cv_higher_x+2; x++){
+            canvas_matrix[cv_index] = 0xcc5454;
+            cv_index++;
+        }
+        // Top
+        cv_index = (cv_higher_y+1)*canvas_width + cv_lower_x-1;
+        for (int x = cv_lower_x; x <= cv_higher_x+2; x++){
+            canvas_matrix[cv_index] = 0xcc5454;
+            cv_index++;
+        }
+    }
+
     float factor = (float)render_state.height/100.f;
 
     canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
-    texture_manager->create_render_object(canvas,0);
+    texture_manager->create_render_object(canvas,CANVAS_RENDER_LAYER);
     shared_ptr<Render_Matrix> c_indicator = texture_manager->create_render_matrix(-CANVAS_WIDTH/2 - 3,CANVAS_HEIGHT/2 - 2,1,1,colour_indicator,4,4);
-    texture_manager->create_render_object(c_indicator,1);
+    texture_manager->create_render_object(c_indicator,INDICATOR_RENDER_LAYER);
     WGAERRCHECK(texture_manager->register_all_objects());
     drawer->set_background_colour(BACKGROUND_COLOUR);
+    texture_manager->load_character_textures();
+    drw_width = make_shared<Text_Object>(drawer,texture_manager,"0",77,42,TEXT_SIZE,texture_manager->get_char_width(),TEXT_RENDER_LAYER);
+    drw_height = make_shared<Text_Object>(drawer,texture_manager,"0",87,42,TEXT_SIZE,texture_manager->get_char_width(),TEXT_RENDER_LAYER);
+    update_drw_dims(cv_higher_x-cv_lower_x+1,cv_higher_y-cv_lower_y+1);
 }
 
 void render_update(){

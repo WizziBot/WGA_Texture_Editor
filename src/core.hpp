@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <iostream>
 #include <vector>
+#include <list>
 #include <memory>
 #include <string>
 #include <math.h>
@@ -20,6 +21,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::vector;
+using std::list;
 
 namespace WinGameAlpha{
 

@@ -139,7 +139,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         QueryPerformanceFrequency(&perf);
         performance_frequency = (float)perf.QuadPart;
     }
-
+    HCURSOR point_cursor = LoadCursorA(NULL,(LPCSTR)IDC_ARROW);
     while (running){
         MSG message;
         for (int i = 0; i < BUTTON_COUNT; i++){
@@ -172,6 +172,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
                     input.mouse_state.down = (MK_LBUTTON & message.wParam);
                 }break;
                 case WM_MOUSEMOVE:{
+                    SetCursor(point_cursor);
                     input.mouse_state.x_pos = LOWORD(message.lParam);
                     input.mouse_state.y_pos = HIWORD(message.lParam);
                 }break;
@@ -206,6 +207,5 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart)/performance_frequency;
         frame_begin_time = frame_end_time;
     }
-    app_cleanup();
     return 0;
 }

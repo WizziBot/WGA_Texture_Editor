@@ -24,7 +24,6 @@ extern bool running;
 extern bool updates;
 
 uint32_t* canvas_matrix;
-uint32_t* loaded_texture;
 int cv_lower_x=0, cv_lower_y=0;
 int cv_higher_x=0, cv_higher_y=0;
 int canvas_width;
@@ -34,7 +33,6 @@ int colours_size;
 uint32_t active_colour = 0;
 shared_ptr<Drawer> drawer;
 shared_ptr<Texture_Manager> texture_manager;
-shared_ptr<Render_Matrix> canvas;
 shared_ptr<App_Settings> settings;
 shared_ptr<Text_Object> drw_width;
 shared_ptr<Text_Object> drw_height;
@@ -50,6 +48,10 @@ uint32_t background_matrix[] {
 };
 
 // Functions
+
+void app_cleanup(){
+    VirtualFree(canvas_matrix,0,MEM_RELEASE);
+}
 
 inline void memset32(void *m, uint32_t val, size_t count)
 {
@@ -230,13 +232,16 @@ void render_init(){
         return;
     }
 
-    // Canvas background
-    shared_ptr<Render_Matrix> canvas_background = texture_manager->create_render_matrix(0,0,1,1,background_matrix,CANVAS_WIDTH,CANVAS_HEIGHT);
-    texture_manager->create_render_object(canvas_background,0);
+    /*** Register Phase 0 ***/
 
+    // Canvas background
+    int canvas_background_idx = texture_manager->create_render_matrix(0,0,1,1,background_matrix,CANVAS_WIDTH,CANVAS_HEIGHT);
+    texture_manager->load_character_textures();
+    
     // Load texture
     int width=0,height=0;
     float ld_unit_size = 0;
+    uint32_t* loaded_texture;
     err = get_load_texture_name();
     if (err == WGA_FAILURE) load_texture_name = "texture.wgat";
     else err = texture_manager->load_texture(&loaded_texture,&width,&height,&ld_unit_size,load_texture_name);
@@ -259,6 +264,15 @@ void render_init(){
         load_onto_canvas(loaded_texture,width,height);
         cout << "Loaded Texture: " << load_texture_name << endl;
     } else cout << "No texture loaded" << endl;
+    // Canvas setup finish
+
+    int canvas_idx = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
+    int c_indicator_idx = texture_manager->create_render_matrix(-CANVAS_WIDTH/2 - 3,CANVAS_HEIGHT/2 - 2,1,1,colour_indicator,4,4);
+
+    /*** Register Phase 1 ***/
+    texture_manager->next_registration_phase();
+
+    texture_manager->create_render_object(canvas_background_idx,CANVAS_RENDER_LAYER);
 
     // Strict dims
     using_sdims = settings->using_sdims();
@@ -297,15 +311,14 @@ void render_init(){
         }
     }
 
-    float factor = (float)render_state.height/100.f;
+    texture_manager->create_render_object(canvas_idx,CANVAS_RENDER_LAYER);
+    texture_manager->create_render_object(c_indicator_idx,INDICATOR_RENDER_LAYER);
 
-    canvas = texture_manager->create_render_matrix(0,0,(float)canvas_width,(float)canvas_height,canvas_matrix,canvas_unit_size,canvas_unit_size);
-    texture_manager->create_render_object(canvas,CANVAS_RENDER_LAYER);
-    shared_ptr<Render_Matrix> c_indicator = texture_manager->create_render_matrix(-CANVAS_WIDTH/2 - 3,CANVAS_HEIGHT/2 - 2,1,1,colour_indicator,4,4);
-    texture_manager->create_render_object(c_indicator,INDICATOR_RENDER_LAYER);
+    /*** Register Phase 2 ***/
     WGAERRCHECK(texture_manager->register_all_objects());
+    /*** End of Registration ***/
+
     drawer->set_background_colour(BACKGROUND_COLOUR);
-    texture_manager->load_character_textures();
     drw_width = make_shared<Text_Object>(drawer,texture_manager,"0",77,42,TEXT_SIZE,texture_manager->get_char_width(),TEXT_RENDER_LAYER);
     drw_height = make_shared<Text_Object>(drawer,texture_manager,"0",87,42,TEXT_SIZE,texture_manager->get_char_width(),TEXT_RENDER_LAYER);
     update_drw_dims(cv_higher_x-cv_lower_x+1,cv_higher_y-cv_lower_y+1);

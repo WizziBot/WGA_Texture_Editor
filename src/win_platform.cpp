@@ -207,5 +207,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart)/performance_frequency;
         frame_begin_time = frame_end_time;
     }
+    app_cleanup();
     return 0;
 }

@@ -125,6 +125,8 @@ void Drawer::draw_objects(){
             matrix_data[7] = render_state.width - unit_size_x_px*matrix->m_width;
             matrix_data[8] = x0 % render_state.width;
             matrix_data[9] = y0;
+            if ((*render_object)->is_mask) matrix_data[10] = (*render_object)->mask_colour;
+            else matrix_data[10] = ALPHA_BIT;
             clEnqueueUnmapMemObject(queue, matrix_data_buf, matrix_data, 0, NULL, NULL);
             // Wait for previous kernel to finish before changing matrix buffer
             if (render_object != (*layer).begin()) clWaitForEvents(1,&wait_for_draw);

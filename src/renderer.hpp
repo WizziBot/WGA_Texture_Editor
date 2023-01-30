@@ -14,7 +14,7 @@
 #define OCL_ERROR_CHECKING
 #define CL_TARGET_OPENCL_VERSION 300
 #include <CL/cl.h>
-#define MATRIX_DATA_BUF_SIZE 10
+#define MATRIX_DATA_BUF_SIZE 11
 #define RECT_DATA_BUF_SIZE 5
 #define OCLERR(msg) {cerr << "OpenCL Error: " << msg << endl; \
                     return WGA_FAILURE;}
@@ -140,6 +140,7 @@ const char *kernel_source = \
     uint wrap_step = matrix_data[7];\n\
     uint x0 = matrix_data[8];\n\
     uint y0 = matrix_data[9];\n\
+    uint mask = matrix_data[10];\n\
     \n\
     uint gid = get_global_id(0);\n\
     uint overflow = (gid/(width*unit_width)) * wrap_step;\n\
@@ -151,7 +152,8 @@ const char *kernel_source = \
     while (idx<maxid){\n\
         matrix_idx = ((idx%buffer_width)-x0)/(unit_width) + (((idx/buffer_width) - y0)/(unit_height))*width;\n\
         if (matrix_buffer[matrix_idx] != 0x80000000){\n\
-            buffer[idx] = matrix_buffer[matrix_idx];\n\
+            if (mask == 0x80000000) buffer[idx] = matrix_buffer[matrix_idx];\n\
+            else buffer[idx] = mask;\n\
         }\n\
         idx = minid + gid + stride*i + ((gid+stride*i)/(width*unit_width)) * wrap_step;\n\
         i++;\n\

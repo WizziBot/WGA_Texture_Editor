@@ -18,7 +18,7 @@ wga_err Texture_Manager::create_render_object(int render_matrix_index, int rende
 }
 
 int Texture_Manager::create_render_matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y){
-    if (registration_phase != 0) return WGA_FAILURE;
+    if (registration_phase != 0) return -1;
     render_matrices.push_back(Render_Matrix(x_offset, y_offset, width, height, matrix, unit_size_x, unit_size_y));
     return render_matrices.size()-1;
 }

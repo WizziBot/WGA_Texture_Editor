@@ -17,6 +17,7 @@ __kernel void draw_matrix_kernel(const __global uint *matrix_data,
     uint wrap_step = matrix_data[7];
     uint x0 = matrix_data[8];
     uint y0 = matrix_data[9];
+    uint mask = matrix_data[10];
     
     uint gid = get_global_id(0);
     uint overflow = (gid/(width*unit_width)) * wrap_step;
@@ -29,7 +30,8 @@ __kernel void draw_matrix_kernel(const __global uint *matrix_data,
     while (idx<maxid){
         matrix_idx = ((idx%buffer_width)-x0)/(unit_width) + (((idx/buffer_width) - y0)/(unit_height))*width;
         if (matrix_buffer[matrix_idx] != 0x80000000){
-            buffer[idx] = matrix_buffer[matrix_idx];
+            if (mask == 0x80000000) buffer[idx] = matrix_buffer[matrix_idx];
+            else buffer[idx] = mask;
         }
         idx = minid + gid + stride*i + ((gid+stride*i)/(width*unit_width)) * wrap_step;
         i++;

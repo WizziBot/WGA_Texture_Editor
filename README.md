@@ -30,14 +30,15 @@ When saving your texture, the size used is also saved onto the .wgat file and wh
 ### WGA Objects Reference
 List of replaceable objects/textures within WGA and their dimensions in normalised coordinates (the same dimensions of the size of your brush). These are not strict requirements but guidelines to know how large to make certain textures.
 
-The following list contains the name of each file that must be included in the WGA textures directory and how it will be imported.
+The following list contains the name of each file that must be included in the WGA textures directory and how it should be imported. For any relevant orientation information, they will be mentioned.
 
 #### Game objects
-* `player.wgat` Width: 5, Height: 20, Description: The ambient player texture.
-* `player_bounce.wgat` Width: 5, Height: 20, Description: The texture displayed after a collision with the ball.
+* `player.wgat` Width: 20, Height: 5, Orientation: Facing upwards i.e. a horizontal rectangle with the 'front' being the top, will be rotated in WGA. Description: The ambient player texture.
+* `player_bounce.wgat` Width: 20, Height: 5, Orientation: Same as `player.wgat` Description: The texture displayed after a collision with the ball.
 * `ball.wgat` Width: 2, Height: 2, Description: The ambient ball texture.
 * `ball_bounce.wgat` Width: 2, Height: 2, Description: The texture displayed after a collision with the player.
 * `arena.wgat` Width: 180, Height: 90, Description: The texture of the arena during game time.
 
+Note: There is a currently unresolved bug where the texture imported must have a larger width and height than specified in order to actually be displayed as the width and height specified, aspect ratio will be the same though.
 #### Text
 Stored in the subdirectory `./textures/text` each character `0.wgat` through `9.wgat` should be imported in uniform dimensions i.e. the strict_dims setting should be used when designing text type textures for all characters 0-9 with the same dims.

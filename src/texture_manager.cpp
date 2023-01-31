@@ -3,16 +3,28 @@
 
 namespace WinGameAlpha {
 
-void Texture_Manager::create_render_object(shared_ptr<Render_Matrix> render_matrix, int render_layer){
-    render_objects.push_back(Render_Object(m_drawer,render_matrix,render_layer,false));
+Texture_Manager::~Texture_Manager(){
+    for (auto matrix : render_matrices){
+        matrix.free_matrix();
+    }
 }
 
-shared_ptr<Render_Matrix> Texture_Manager::create_render_matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y){
-    render_matrices.push_back(make_shared<Render_Matrix>(x_offset, y_offset, width, height, matrix, unit_size_x, unit_size_y));
-    return render_matrices.back();
+wga_err Texture_Manager::create_render_object(int render_matrix_index, int render_layer){
+    if (registration_phase != 1) return WGA_FAILURE;
+    if (render_matrix_index < 0 || render_matrix_index >= render_matrices.size()) return WGA_FAILURE;
+    Render_Matrix* render_matrix = &render_matrices.at(render_matrix_index);
+    render_objects.push_back(Render_Object(m_drawer,render_matrix,render_layer,false));
+    return WGA_SUCCESS;
+}
+
+int Texture_Manager::create_render_matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y){
+    if (registration_phase != 0) return -1;
+    render_matrices.push_back(Render_Matrix(x_offset, y_offset, width, height, matrix, unit_size_x, unit_size_y));
+    return render_matrices.size()-1;
 }
 
 wga_err Texture_Manager::load_character_textures(){
+    if (registration_phase != 0) return WGA_FAILURE;
     wga_err err;
 
     // Load character textures into char lib
@@ -22,26 +34,34 @@ wga_err Texture_Manager::load_character_textures(){
     // Numbers
     char num = '0';
     string curr = "./textures/text/";
-    for (int i=0; i<10;i++){
+    int matrix_idx[10] = {0};
+    int i;
+    for (i=0; i<10;i++){
         curr += (num+i);
         curr += ".wgat";
         err = load_texture(&matrix,&width,&height,&unit_size,curr);
         TEXEX("Could not load texture " << curr,err)
         curr = "./textures/text/";
         if (i==0) m_char_width = width;
-        shared_ptr<Render_Matrix> temp = create_render_matrix(0,0,width,height,matrix,unit_size,unit_size);
-        m_char_lib.character_list.push_back(temp);
+        matrix_idx[i] = create_render_matrix(0,0,width,height,matrix,unit_size,unit_size);
+    }
+    Render_Matrix* render_matrix;
+    for (i=0;i<10;i++){
+        render_matrix = &render_matrices.at(matrix_idx[i]);
+        m_char_lib.character_list.push_back(render_matrix);
     }
 
     return WGA_SUCCESS;
 }
 
 wga_err Texture_Manager::register_all_objects(){
+    if (registration_phase != 1) return WGA_FAILURE;
+    registration_phase++;
+
     wga_err err;
     vector<Render_Object>::iterator iter;
     for (iter = render_objects.begin(); iter != render_objects.end(); iter++){
-        shared_ptr<Render_Object> new_obj((Render_Object*)iter.base());
-        err = m_drawer->register_render_object(new_obj);
+        err = m_drawer->register_render_object(iter.base());
         if (err != WGA_SUCCESS) return WGA_FAILURE;
     }
     return WGA_SUCCESS;

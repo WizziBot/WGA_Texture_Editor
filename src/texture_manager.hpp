@@ -17,17 +17,18 @@ public:
 Texture_Manager(shared_ptr<Drawer> drawer){
     m_drawer = drawer;
 }
-/* Render object which contains matrices to be rendered on each draw() call if registered
-    @param render_matrix a pointer to the render matrix texture
+~Texture_Manager();
+/* (PHASE 1) Render object which contains matrices to be rendered on each draw() call if registered
+    @param render_matrix_index the render matrix's index number returned by create_render_matrix()
     @param render_layer the id of the render layer of the object where the render objects within the layer will be rendered together,
     the render layers must be declared contiguously i.e. layer 0 must exist before layer 1
     @return WGA_SUCCESS on succes and WGA_FAILURE on failure
 */
-void create_render_object(shared_ptr<Render_Matrix> render_matrix, int render_layer);
-/* Load character textures. Initialises the Character_Library and fills it with the Render_Matrix objects retrieved by loading the textures
+wga_err create_render_object(int render_matrix_index, int render_layer);
+/* (PHASE 0) Load character textures. Initialises the Character_Library and fills it with the Render_Matrix objects retrieved by loading the textures
 */
 wga_err load_character_textures();
-/* Render matrix is a matrix type texture
+/* (PHASE 0) Render matrix is a matrix type texture
     @param x_offset the x_offset from the related object's coordinates
     @param y_offset the y_offset from the related object's coordinates
     @param width the number of elements in width of the matrix
@@ -35,10 +36,18 @@ wga_err load_character_textures();
     @param matrix a pointer to an array of colours for each unit element
     @param unit_size_x the width of each square unit in relative size
     @param unit_size_y the height of each square unit in relative size
-    @return A pointer to the created render matrix
+    @return The index of the render matrix, returns -1 on failure
 */
-shared_ptr<Render_Matrix> create_render_matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y);
-/* Register all objects, must be called AFTER all objects are created, will cause memory errors otherwise. */
+int create_render_matrix(float x_offset, float y_offset, float width, float height, uint32_t* matrix, float unit_size_x, float unit_size_y);
+/* Increments the registration phase, part of a safety mechanism to ensure render objects are created in the correct order.
+    - Render Matrices (phase 0)
+    - Render Objects (phase 1)
+    - Register render objects with register_all_objects() (phase 3)
+*/
+void next_registration_phase(){
+    registration_phase++;
+}
+/* Register all objects, must be called at the end of (PHASE 1)  */
 wga_err register_all_objects();
 /* Save a render matrix texture as a .wgat file
     @param matrix pointer to the raw matrix of the render matrix to be copied from
@@ -55,7 +64,7 @@ static wga_err save_texture(uint32_t* matrix, int width, int height, float unit_
     @param unit_size a pointer to where the unit size will be stored
     @param file_name the name of the file
 */
-static wga_err load_texture(uint32_t** matrix_dst, int* width, int* height, float* unit_size, string file_name);
+wga_err load_texture(uint32_t** matrix_dst, int* width, int* height, float* unit_size, string file_name);
 /* Crop a submatrix out of a larger matrix
     @param matrix a pointer to the main matrix
     @param matrix_width the width of tha main matrix
@@ -76,8 +85,9 @@ private:
 shared_ptr<Drawer> m_drawer;
 Character_Library m_char_lib;
 int m_char_width=0;
+int registration_phase = 0;
 vector<Render_Object> render_objects;
-vector<shared_ptr<Render_Matrix>> render_matrices;
+vector<Render_Matrix> render_matrices;
 };
 
 }
